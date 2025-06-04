@@ -3,23 +3,12 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-import jwt
-from datetime import datetime, timedelta
-from django.conf import settings
+from .auth import verify_credentials, generate_token
 
 DUMMY_CREDENTIALS = {
     "admin": "admin123",
     "user": "user123"
 }
-
-def generate_token(username):
-    """Generate a simple JWT token"""
-    payload = {
-        'username': username,
-        'exp': datetime.utcnow() + timedelta(days=1),
-        'iat': datetime.utcnow()
-    }
-    return jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
 
 @api_view(['POST']) 
 def login_view(request):
@@ -32,7 +21,7 @@ def login_view(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    if username in DUMMY_CREDENTIALS and DUMMY_CREDENTIALS[username] == password:
+    if verify_credentials(username, password):
         token = generate_token(username)
         return Response({
             "message": "Login successful",
