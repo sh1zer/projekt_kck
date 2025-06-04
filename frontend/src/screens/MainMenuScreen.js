@@ -8,6 +8,8 @@ function MainMenuScreen() {
       <Link to="/game">Start Game</Link>
       <br />
       <Link to="/login">Logout</Link>
+      <br/>
+      <Link to="/options">Options</Link>
     </div>
   );
 }
