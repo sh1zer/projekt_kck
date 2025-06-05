@@ -1,13 +1,268 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+html {
+    height: 100%;
+    font-size: 14px;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+.App {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-size: 1rem;
+  font-family: 'open sans';
+  background-color: #202020;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+#center_wraper {
+  margin: auto;
+  width: 350px;
+  height: 550px;
+}
+
+#login_pannel {
+  background-color: #817b7b;
+
+  height: 450px;
+  width: 100%;
+
+  border-radius: 30px;
+
+  box-shadow: 18px 15px 8px #161616;
+  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#input_pannel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 80%;
+  height: 25%;
+  margin-top: 32px;
+}
+
+#button_pannel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 80%;
+  height: 25%;
+}
+
+#info_pannel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 80%;
+  height: 25%;
+  margin-top: auto;
+  margin-bottom: 40px;
+}
+
+.input_div{
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  background-color: #202020;
+  width: 100%;
+  height: 30px;
+  border-radius: 5px;
+}
+
+.input_icon_div {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#eye_icon_div {
+  width: 26px;
+  height: 26px;
+  border-radius: 13px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  margin-right: 2px;
+  margin-left: auto;
+}
+
+#eye_icon_div:hover {
+  background-color: #4d4d4d;
+}
+
+.icon {
+  height: 20px;
+}
+
+#check_div {
+  background-color: #817b7b;
+  justify-content: start;
+}
+
+.text_input {
+  font-size: 1rem;
+  font-family: 'open sans';
+  padding: 0;
+  border: none;
+  width: 75%;
+  height: 100%;
+  background-color: #202020;
+  color: #f8f6f6;
+}
+
+.text_input:focus {
+    outline: none;
+    border: none;
+}
+
+#banner_img {
+  height: 85px;
+}
+
+#warning_header {
+  font-weight: bold;
+  color:#c00117;
+  font-size: 1.2rem;
+}
+
+#warning_paragraf {
+  color:#c00117;
+  text-align: left;
+}
+
+#log_in_button:link, #log_in_button:visited {
+  border-radius: 5px;
+  border-color: #45753c;
+  border-width: 2px;
+  border-style: solid;
+  background-color: #81b64c;
+  width: 88%;
+  box-shadow: 5px 5px 3px #615e5e;
+
+  padding: 6%;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+}
+
+#log_in_button:hover, #log_in_button:active {
+  border-color: #45753c;
+  background-color: #5fa240;
+}
+
+#main_menu_screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+#button_pannel_pos_div {
+  width: 25%;
+  height: 100% - 4px;
+
+  border-width: 2px;
+  border-color: red;
+  border-style: solid;
+}
+
+#center_pannel_pos_div {
+  width: 50%;
+  height: 100% - 4px;
+  
+  border-width: 2px;
+  border-color: blue;
+  border-style: solid;
+}
+
+#user_pannel_pos_div {
+  width: 25%;
+  height: 100% - 4px;
+  
+  border-width: 2px;
+  border-color: hotpink;
+  border-style: solid;
+}
+
+#button_pannel_div {
+  width: 80%;
+  height: 80%;
+  
+  margin: auto;
+  margin-top: 15%;
+  background-color: #15202b;
+
+  border-radius: 15px;
+  border-width: 2px;
+  border-color: greenyellow;
+  border-style: solid;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#banner_div {
+  margin-top: 50px;
+  margin-bottom: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#banner_icon {
+  width: 100px;
+}
+
+#banner_text {
+  margin-left: 30px;
+  font-family: 'Aoboshi One';
+  font-size: 3.2rem;
+  color: red;
+}
+
+.menu_button:link, .menu_button:visited {
+  border-radius: 30px;
+  
+  background-color: #ec5c39;
+  width: 60%;
+
+  padding: 8%;
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 40px;
+}
+
+.menu_button:hover, .menu_button:active {
+  background-color: #c74526;
 }
