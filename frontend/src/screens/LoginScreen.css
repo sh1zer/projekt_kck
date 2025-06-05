@@ -58,7 +58,7 @@ body {
   align-items: center;
   justify-content: space-between;
   width: 80%;
-  height: 25%;
+  height: 35%;
   margin-top: 32px;
 }
 
@@ -143,6 +143,11 @@ body {
   height: 85px;
 }
 
+#error_div {
+    width: 100%;
+    height: 5%;
+}
+
 #warning_header {
   font-weight: bold;
   color:#c00117;
@@ -154,13 +159,13 @@ body {
   text-align: left;
 }
 
-#log_in_button:link, #log_in_button:visited {
+#log_in_button{
   border-radius: 5px;
   border-color: #45753c;
   border-width: 2px;
   border-style: solid;
   background-color: #81b64c;
-  width: 88%;
+  width: 100%;
   box-shadow: 5px 5px 3px #615e5e;
 
   padding: 6%;
@@ -175,4 +180,13 @@ body {
 #log_in_button:hover, #log_in_button:active {
   border-color: #45753c;
   background-color: #5fa240;
+}
+
+form {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-direction: column;
 }
