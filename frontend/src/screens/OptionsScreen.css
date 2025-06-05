@@ -1,0 +1,84 @@
+.options-container {
+  min-height: 100vh;
+  background-color: #2d2d2d;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+}
+
+.options-card {
+  background-color: #8a8a8a;
+  border-radius: 12px;
+  padding: 40px;
+  width: 400px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.options-title {
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.option-group {
+  margin-bottom: 20px;
+}
+
+.option-checkbox-label {
+  display: flex;
+  align-items: center;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.option-checkbox {
+  margin-right: 12px;
+  width: 18px;
+  height: 18px;
+  accent-color: #7cb342;
+}
+
+.options-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.save-button {
+  background-color: #7cb342;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.save-button:hover {
+  background-color: #689f38;
+}
+
+.back-button {
+  background-color: #4a4a4a;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 14px;
+  font-size: 16px;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.back-button:hover {
+  background-color: #5a5a5a;
+}
+
