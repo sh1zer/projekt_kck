@@ -1,0 +1,326 @@
+/* MainMenuScreen.css */
+
+.main-menu-container {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    color: white;
+    min-height: 100vh;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  /* Header with logo and user */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    position: relative;
+    z-index: 10;
+  }
+  
+  .logo-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .logo {
+    width: 45px;
+    height: 45px;
+    background: #e53e3e;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 24px;
+    color: white;
+  }
+  
+  .logo-text {
+    font-size: 28px;
+    font-weight: bold;
+    color: #e53e3e;
+  }
+  
+  .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .user-avatar {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+    color: white;
+  }
+  
+  .user-info h3 {
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+  
+  .user-info .elo {
+    font-size: 14px;
+    color: #a0aec0;
+  }
+  
+  /* Main content area */
+  .main-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 120px);
+    position: relative;
+  }
+  
+  /* Left menu buttons */
+  .menu-buttons {
+    position: absolute;
+    left: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .menu-btn {
+    background: #e53e3e;
+    border: none;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    width: 140px;
+    text-decoration: none;
+    text-align: center;
+    display: block;
+  }
+  
+  .menu-btn:hover {
+    background: #c53030;
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(229, 62, 62, 0.4);
+    color: white;
+    text-decoration: none;
+  }
+  
+  /* Center play section */
+  .play-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    z-index: 5;
+  }
+  
+  .play-btn {
+    background: #e53e3e;
+    border: none;
+    color: white;
+    padding: 25px 70px;
+    border-radius: 12px;
+    font-size: 42px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(229, 62, 62, 0.3);
+    letter-spacing: 2px;
+    text-decoration: none;
+    display: block;
+    text-align: center;
+  }
+  
+  .play-btn:hover {
+    background: #c53030;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(229, 62, 62, 0.5);
+    color: white;
+    text-decoration: none;
+  }
+  
+  /* Leaderboard section */
+  .leaderboard-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .leaderboard-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #ffd700;
+  }
+  
+  .trophy-icon {
+    width: 25px;
+    height: 25px;
+    background: #ffd700;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a202c;
+    font-size: 12px;
+  }
+  
+  .leaderboard-table {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 15px;
+    backdrop-filter: blur(10px);
+    min-width: 300px;
+  }
+  
+  .leaderboard-row {
+    display: grid;
+    grid-template-columns: 30px 35px 1fr 50px 60px;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 14px;
+  }
+  
+  .rank {
+    font-weight: bold;
+    color: #ffd700;
+  }
+  
+  .player-avatar {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  .rating {
+    color: #a0aec0;
+  }
+  
+  .wld {
+    color: #a0aec0;
+    font-size: 12px;
+  }
+  
+  /* Right problems section */
+  .problems-section {
+    position: absolute;
+    right: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    width: 200px;
+  }
+  
+  .problems-header {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-align: center;
+    color: #e2e8f0;
+  }
+  
+  .problem-item {
+    padding: 6px 0;
+    color: #a0aec0;
+    font-size: 14px;
+  }
+  
+  /* Background blur effect */
+  .background-blur {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(229, 62, 62, 0.1) 0%, transparent 70%);
+    z-index: 1;
+    pointer-events: none;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 1200px) {
+    .menu-buttons {
+      left: 30px;
+    }
+    
+    .problems-section {
+      right: 30px;
+    }
+  }
+  
+  @media (max-width: 1024px) {
+    .main-content {
+      flex-direction: column;
+      gap: 30px;
+      padding: 20px;
+    }
+  
+    .menu-buttons,
+    .problems-section {
+      position: static;
+      transform: none;
+    }
+  
+    .menu-buttons {
+      flex-direction: row;
+      justify-content: center;
+      flex-wrap: wrap;
+      order: 3;
+    }
+  
+    .problems-section {
+      order: 2;
+      width: 100%;
+      max-width: 300px;
+    }
+  
+    .play-section {
+      order: 1;
+    }
+  
+    .play-btn {
+      font-size: 32px;
+      padding: 20px 50px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .header {
+      padding: 15px 20px;
+    }
+  
+    .logo-text {
+      font-size: 24px;
+    }
+  
+    .user-avatar {
+      width: 45px;
+      height: 45px;
+    }
+  
+    .play-btn {
+      font-size: 28px;
+      padding: 18px 40px;
+    }
+  }
