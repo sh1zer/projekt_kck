@@ -51,6 +51,31 @@ def protected_view(request):
 def test_submission(request, problem_id):
     """
     Test a code submission for a specific problem.
+
+    Request:
+        POST /api/problems/{problem_id}/test/
+        
+        Body:
+        {
+            "code": str  # The C code to be tested
+        }
+
+    Response:
+        {
+            "status": str,  # One of: "success", "error", "compilation_error", "runtime_error", "timeout", "memory_error", "test_failed"
+            "tests": {
+                "1": {  # Test number
+                    "status": str,  # "PASS" or "FAIL"
+                    "message": str  # Error message if failed, empty if passed
+                },
+                ...
+            }
+        }
+
+    Status Codes:
+        200: Test completed successfully
+        400: No code provided
+        404: Problem not found
     """
     try:
         problem = Problem.objects.get(id=problem_id)
@@ -67,14 +92,12 @@ def test_submission(request, problem_id):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # Construct the path to the test file
     test_file_path = os.path.join(
         os.path.dirname(os.path.dirname(__file__)),
         "problem_tests",
         problem.test_file
     )
 
-    # Execute the submission
     result = execute_submission(user_code, test_file_path)
     return Response(result)
 
