@@ -6,6 +6,8 @@ from rest_framework.permissions import IsAuthenticated
 from .auth import verify_credentials, generate_token
 from .models import Problem
 from .serializers import ProblemSerializer
+from .code_executor import execute_submission
+import os
 
 DUMMY_CREDENTIALS = {
     "admin": "admin123",
@@ -44,6 +46,37 @@ def protected_view(request):
         "message": f"Hello {request.user}! This is a protected endpoint.",
         "data": "Some protected data"
     })
+
+@api_view(['POST'])
+def test_submission(request, problem_id):
+    """
+    Test a code submission for a specific problem.
+    """
+    try:
+        problem = Problem.objects.get(id=problem_id)
+    except Problem.DoesNotExist:
+        return Response(
+            {"error": "Problem not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    user_code = request.data.get('code')
+    if not user_code:
+        return Response(
+            {"error": "No code provided"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Construct the path to the test file
+    test_file_path = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)),
+        "problem_tests",
+        problem.test_file
+    )
+
+    # Execute the submission
+    result = execute_submission(user_code, test_file_path)
+    return Response(result)
 
 class ProblemViewSet(viewsets.ModelViewSet):
     """

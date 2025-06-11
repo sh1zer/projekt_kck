@@ -7,5 +7,5 @@ class ProblemSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'description', 'difficulty', 
             'time_limit', 'test_cases', 'sample_input', 
-            'sample_output', 'solution_template'
-        ] 
+            'sample_output', 'solution_template', 'test_file'
+        ]

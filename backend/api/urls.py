@@ -10,4 +10,5 @@ urlpatterns = [
     path('', include(router.urls)),
     # API endpoints go here
     path('login/', views.login_view, name='api_login'),
+    path('problems/<int:problem_id>/test/', views.test_submission, name='test_submission'),
 ]

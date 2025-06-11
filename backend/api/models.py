@@ -17,6 +17,7 @@ class Problem(models.Model):
     sample_input = models.TextField(help_text="Sample input for the problem")
     sample_output = models.TextField(help_text="Sample output for the problem")
     solution_template = models.TextField(blank=True, help_text="Optional starter code template")
+    test_file = models.CharField(max_length=200, help_text="Name of the test file in problem_tests directory")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
