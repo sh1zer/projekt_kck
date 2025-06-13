@@ -1,13 +1,15 @@
-from django.shortcuts import render
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
-from rest_framework import status, viewsets
-from rest_framework.permissions import IsAuthenticated
-from .auth import verify_credentials, generate_token
-from .models import Problem
-from .serializers import ProblemSerializer
-from .code_executor import execute_submission
 import os
+import time
+from django.db.models import Q
+from django.contrib.auth.models import User
+from rest_framework import status, viewsets
+from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from .auth import verify_credentials, generate_token
+from .models import Problem, Duel, DuelSubmission
+from .serializers import ProblemSerializer, DuelSerializer
+from .code_executor import execute_submission
 
 DUMMY_CREDENTIALS = {
     "admin": "admin123",
@@ -47,59 +49,6 @@ def protected_view(request):
         "data": "Some protected data"
     })
 
-@api_view(['POST'])
-def test_submission(request, problem_id):
-    """
-    Test a code submission for a specific problem.
-
-    Request:
-        POST /api/problems/{problem_id}/test/
-        
-        Body:
-        {
-            "code": str  # The C code to be tested
-        }
-
-    Response:
-        {
-            "status": str,  # One of: "success", "error", "compilation_error", "runtime_error", "timeout", "memory_error", "test_failed"
-            "tests": {
-                "1": {  # Test number
-                    "status": str,  # "PASS" or "FAIL"
-                    "message": str  # Error message if failed, empty if passed
-                },
-                ...
-            }
-        }
-
-    Status Codes:
-        200: Test completed successfully
-        400: No code provided
-        404: Problem not found
-    """
-    try:
-        problem = Problem.objects.get(id=problem_id)
-    except Problem.DoesNotExist:
-        return Response(
-            {"error": "Problem not found"},
-            status=status.HTTP_404_NOT_FOUND
-        )
-
-    user_code = request.data.get('code')
-    if not user_code:
-        return Response(
-            {"error": "No code provided"},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-    test_file_path = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)),
-        "problem_tests",
-        problem.test_file
-    )
-
-    result = execute_submission(user_code, test_file_path)
-    return Response(result)
 
 class ProblemViewSet(viewsets.ModelViewSet):
     """
@@ -119,3 +68,115 @@ class ProblemViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(difficulty=difficulty)
         return queryset
 
+MATCHMAKING_QUEUE = []
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def matchmaking_view(request):
+    """
+    A unified endpoint to handle joining the queue and checking match status.
+    The client should call this endpoint repeatedly until a duel is returned.
+    """
+    user = request.user
+
+    # Check if the user is already in an active duel.
+    active_duel = Duel.objects.filter(
+        (Q(player1=user) | Q(player2=user)) & Q(status='active')
+    ).first()
+    if active_duel:
+        serializer = DuelSerializer(active_duel)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    if user not in MATCHMAKING_QUEUE:
+        MATCHMAKING_QUEUE.append(user)
+
+    if len(MATCHMAKING_QUEUE) >= 2:
+        player1 = MATCHMAKING_QUEUE.pop(0)
+        player2 = MATCHMAKING_QUEUE.pop(0)
+
+        problem = Problem.objects.order_by('?').first()
+        if not problem:
+            return Response({"error": "No problems available to start a duel."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        new_duel = Duel.objects.create(
+            problem=problem,
+            player1=player1,
+            player2=player2,
+            status='active'
+        )
+        serializer = DuelSerializer(new_duel)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    return Response({"status": "waiting_for_opponent"}, status=status.HTTP_202_ACCEPTED)
+
+
+class DuelViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for viewing Duels and submitting code."""
+    queryset = Duel.objects.all()
+    serializer_class = DuelSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Users can only see duels they participate in."""
+        user = self.request.user
+        return Duel.objects.filter(Q(player1=user) | Q(player2=user))
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Implements long polling to wait for duel state changes.
+        
+        WARNING: This is a simple but inefficient implementation for a PoC. Real system would require rewrite
+        """
+        duel = self.get_object()
+        initial_update_time = duel.updated_at
+
+        # Poll for up to 30 seconds, checking for changes every second.
+        for _ in range(30):
+            duel.refresh_from_db()
+            if duel.updated_at > initial_update_time:
+                serializer = self.get_serializer(duel)
+                return Response(serializer.data)
+            time.sleep(1)
+        
+        # If no update after 30 seconds, return current state
+        serializer = self.get_serializer(duel)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def submit(self, request, pk=None):
+        """Handles a code submission for a duel."""
+        duel = self.get_object()
+        user = request.user
+
+        if duel.status != 'active':
+            return Response({"error": "This duel is not active."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if user != duel.player1 and user != duel.player2:
+            return Response({"error": "You are not a participant in this duel."}, status=status.HTTP_403_FORBIDDEN)
+
+        user_code = request.data.get('code')
+        if not user_code:
+            return Response({"error": "No code provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Execute the code and get the result.
+        test_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "problem_tests", duel.problem.test_file)
+        result = execute_submission(user_code, test_file_path, timeout=duel.problem.time_limit)
+
+        # Log the submission attempt.
+        DuelSubmission.objects.create(
+            duel=duel,
+            player=user,
+            code=user_code,
+            result=result
+        )
+
+        # The first player to pass all tests wins.
+        if result.get("status") == "success":
+            duel.winner = user
+            duel.status = 'completed'
+        
+        # Save changes. This updates the 'updated_at' timestamp, which
+        # notifies any clients using the long polling 'retrieve' endpoint.
+        duel.save()
+
+        return Response(result)
