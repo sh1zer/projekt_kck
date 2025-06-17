@@ -1,14 +1,14 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
-from .views import ProblemViewSet
 
 router = DefaultRouter()
-router.register(r'problems', ProblemViewSet)
+router.register(r'problems', views.ProblemViewSet, basename='problem')
+router.register(r'duels', views.DuelViewSet, basename='duel')
 
 urlpatterns = [
     path('', include(router.urls)),
-    # API endpoints go here
     path('login/', views.login_view, name='api_login'),
-    path('problems/<int:problem_id>/test/', views.test_submission, name='test_submission'),
+    
+    path('matchmaking/', views.matchmaking_view, name='matchmaking'),
 ]
