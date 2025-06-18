@@ -1,7 +1,7 @@
 /* Tailwind layers */
-@tailwind base;
+/* @tailwind base;
 @tailwind components;
-@tailwind utilities;
+@tailwind utilities; */
 
 /* Full-screen layout support */
 html, body, #root {
