@@ -201,6 +201,19 @@ export default function CodingBattleInterface() {
     return () => resizeObserver.disconnect();
   }, [editorContainerRef, editorRef]);
 
+  // Keyboard shortcut: Ctrl+M to reset layout
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.ctrlKey && (e.key === 'm' || e.key === 'M')) {
+        setHorizontalSplit(50);
+        setVerticalSplit(60);
+        e.preventDefault();
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
     <div 
       className="h-screen gamescreen-bg text-white flex relative overflow-hidden"
@@ -211,7 +224,7 @@ export default function CodingBattleInterface() {
       {/* Sidebar */}
       <div className={`fixed left-0 top-0 h-full gamescreen-sidebar transition-transform duration-300 z-50 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } w-64`} style={{borderRight: 'none'}}>
+      } w-64`} style={{backgroundColor: '#1e1e2f', boxShadow: '4px 0 12px rgba(0,0,0,0.4)'}}>
         <div className="p-4 h-full flex flex-col">
           {/* Header with close button */}
           <div className="flex justify-end mb-4">
@@ -345,17 +358,19 @@ export default function CodingBattleInterface() {
         <div className="flex border-t border-gray-700" style={{ height: `${100 - verticalSplit}%` }}>
           {/* Opponent Panel */}
           <div className="border-r border-gray-700 p-4 overflow-y-auto" style={{ width: `${horizontalSplit}%`, background: '#232323' }}>
-            <div style={{background:'#101a28', borderRadius:'0 0 8px 8px', padding:'0 1rem 1rem 1rem', height:'100%', display:'flex', flexDirection:'column', minHeight:0}}>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 gamescreen-profile rounded-full flex items-center justify-center">
-                  <User className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="font-medium">blablauser</div>
-                  <div className="text-xs gamescreen-elo">1950</div>
-                </div>
-                <div className="ml-auto">
-                  <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
+            <div style={{background:'#101a28', borderRadius:'16px', padding:'0 1rem 1rem 1rem', height:'100%', display:'flex', flexDirection:'column', minHeight:0}}>
+              <div style={{marginTop: '1rem'}}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 gamescreen-profile rounded-full flex items-center justify-center">
+                    <User className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="font-medium">blablauser</div>
+                    <div className="text-xs gamescreen-elo">1950</div>
+                  </div>
+                  <div className="ml-auto">
+                    <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
+                  </div>
                 </div>
               </div>
               <div className="space-y-2">
@@ -402,7 +417,7 @@ export default function CodingBattleInterface() {
 
           {/* Your Tests Panel */}
           <div className="bg-gray-850 p-4 overflow-y-auto" style={{ width: `${100 - horizontalSplit}%` }}>
-            <div style={{background:'#101a28', borderRadius:'0 0 8px 8px', padding:'0 1rem 1rem 1rem', height:'100%', display:'flex', flexDirection:'column', minHeight:0}}>
+            <div style={{background:'#101a28', borderRadius:'16px', padding:'0 1rem 1rem 1rem', height:'100%', display:'flex', flexDirection:'column', minHeight:0}}>
               <TestResultsPanel
                 testResults={testResults}
                 expandedTests={expandedTests}

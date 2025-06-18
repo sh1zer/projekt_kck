@@ -33,24 +33,74 @@ export default function EditorPanel({ code, setCode, editorRef, editorContainerR
     });
     if (handleEditorWillMount) handleEditorWillMount(monaco);
   }
+
   function handleMonacoDidMount(editor, monaco) {
     monaco.editor.setTheme('dante-dark');
     if (handleEditorDidMount) handleEditorDidMount(editor, monaco);
   }
+
   return (
-    <>
-      <div style={{background:'#232323', color:'#fff', borderRadius:'8px 8px 0 0', padding:'0.5rem 1rem 0 1rem', marginBottom:0}} className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold tracking-wide">Code</span>
-          <span className="text-xs" style={{background:'#232323',color:'#ffd700',padding:'2px 8px',borderRadius:'6px',marginLeft:'8px', border:'1px solid #ffd700'}}>C</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-white" />
-          <span className="text-sm">15:42</span>
+    <div style={{
+      background: '#232323', // Dark grey background for window2
+      borderRadius: '8px',
+      padding: '1rem 1rem 1rem 1rem',
+      width: '100%',
+      boxSizing: 'border-box',
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+      flex: 1,
+      minHeight: 0,
+    }}>
+      {/* Level 1 - Header Panel with Fixed Height */}
+      <div style={{
+        height: '2rem', // Fixed height for Level 1 panel
+        display: 'flex',
+        alignItems: 'flex-end', // Align content to bottom of the panel
+        paddingRight: '1.5rem', // Move content to the right
+        paddingLeft: '1.5rem',
+        paddingBottom: '0.25rem', // Fine-tune vertical position
+        marginBottom: '1rem', // Gap between Level 1 and blue panel
+      }}>
+        <div className="flex items-center justify-between w-full" style={{ color: '#fff' }}>
+          <div className="flex items-center gap-2">
+            <span className="text-m font-semibold tracking-wide">Code</span>
+            <span 
+              className="text-xs" 
+              style={{
+                background: '#ffd700',
+                color: '#232323',
+                padding: '2px 8px',
+                borderRadius: '6px',
+                marginLeft: '8px'
+              }}
+            >
+              C
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-white" />
+            <span className="text-sm">15:42</span>
+          </div>
         </div>
       </div>
-      <div style={{background:'#101a28', borderRadius:'0 0 8px 8px', padding:'1rem 1rem 1rem 1rem', flex:1, minHeight:0, display:'flex', flexDirection:'column'}}>
-        <div ref={editorContainerRef} style={{flex:1, minHeight:0, display:'flex', flexDirection:'column'}}>
+
+      {/* Blue Panel with Monaco Editor - Same style as ProblemPanel */}
+      <div style={{
+        background: '#101a28', // Same blue background as ProblemPanel
+        borderRadius: '8px',
+        padding: '1rem',
+        flex: 1,
+        minHeight: 0,
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
+        <div ref={editorContainerRef} style={{
+          flex: 1,
+          minHeight: 0,
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
           <MonacoEditor
             height="100%"
             width="100%"
@@ -81,6 +131,6 @@ export default function EditorPanel({ code, setCode, editorRef, editorContainerR
           />
         </div>
       </div>
-    </>
+    </div>
   );
-} 
+}
