@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Check, X, User, Clock, ChevronDown, ChevronRight, Menu, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import EditorPanel from './EditorPanel';
 import ProblemPanel from './ProblemPanel';
 import TestResultsPanel from './TestResultsPanel';
 import './GameScreen.css';
 
 export default function CodingBattleInterface() {
+  const navigate = useNavigate();
   const editorRef = useRef(null);
   const editorContainerRef = useRef(null);
   const [code, setCode] = useState(`
@@ -144,7 +146,7 @@ export default function CodingBattleInterface() {
   const handleExit = () => {
     setShowExitConfirm(false);
     setSidebarOpen(false);
-    alert('Leaving the battle...');
+    navigate('/main-menu');
   };
 
   // Custom Monaco theme for Tailwind dark style

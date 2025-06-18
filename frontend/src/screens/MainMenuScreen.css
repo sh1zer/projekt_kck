@@ -1,11 +1,10 @@
 /* MainMenuScreen.css */
 
 /* --- global visual scale ----------------------------------- */
-html {
-  font-size: 19.2px;     /* 16 px × 1.2  →  entire app 20 % bigger */
-}
+/* Removed html font-size scaling, now scoped to main-menu-root only */
 
 .main-menu-root {
+  font-size: 1.2rem; /* 16px * 1.2 = 19.2px, scoped only to main menu */
   display: flex;
   flex-direction: row;
   min-height: 100vh;
@@ -20,17 +19,17 @@ html {
 /* Left vertical menu bar */
 .left-menu-bar {
   width: 450px;
-  height: 700px; 
+  height: 800px;
   background: #101a28;
-  border-radius: 0 24px 24px 0;
-  margin: 32px 0 32px 0;
+  border-radius: 24px;
+  margin: -5% 0 5% 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 36px 0 36px 0;
   box-shadow: 0 4px 24px rgba(0,0,0,0.18);
   z-index: 2;
-  min-height: 0;
+  min-height: 800px;
   margin-left: 32px;
 }
 
@@ -43,8 +42,8 @@ html {
 }
 
 .hex-logo {
-  width: 54px;
-  height: 54px;
+  width: 90px;
+  height: 90px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -94,7 +93,7 @@ html {
 
 /* Center column: Play and Leaderboard */
 .main-center-area {
-  flex: 1 1 0;
+  flex: 0 0 50%; /* Central div takes exactly 50% of space */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -104,12 +103,12 @@ html {
   justify-content: center;
 }
 .center-column {
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 36px;
   margin-top: 0;
-  width: 100%;
   justify-content: center;
 }
 
@@ -253,10 +252,11 @@ html {
 
 /* Right panel: User profile and Last Problems */
 .right-panel {
+  flex: 0 0 25%; /* Right panel takes exactly 25% of space */
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  justify-content: flex-start;
+  align-items: flex-start; /* Changed from center to flex-start to move content left */
+  justify-content: center; /* Center vertically */
   gap: 48px;
   margin: 32px 0 0 0;
   min-width: 340px;
@@ -266,7 +266,7 @@ html {
 
 .user-profile-card {
   background: #232b3e;
-  border-radius: 14px;
+  border-radius: 24px;
   display: flex;
   align-items: center;
   gap: 18px;
@@ -274,8 +274,9 @@ html {
   box-shadow: 0 2px 12px rgba(0,0,0,0.12);
   z-index: 3;
   width: 100%;
-  max-width: 340px;
+  max-width: 400px; /* Changed from 340px to 400px to match white panel */
   justify-content: space-between;
+  margin-top: -20%;
 }
 .user-profile-img {
   width: 75px;
@@ -343,7 +344,7 @@ html {
   width: 100%;
   max-width: 400px;
   min-width: 260px;
-  min-height: 340px;
+  min-height: 550px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.10);
   z-index: 2;
   display: flex;
@@ -351,7 +352,7 @@ html {
   align-items: flex-start;
   justify-content: flex-start;
   margin-top: 20px;
-  height: 450px;
+  height: 550px;
 }
 
 .last-problems-header {
@@ -484,4 +485,11 @@ html {
     font-size: 15px;
     padding: 8px 8px;
   }
+}
+
+.main-menu-left-panel {
+  flex: 0 0 25%; /* Left panel takes exactly 25% of space */
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
 }
