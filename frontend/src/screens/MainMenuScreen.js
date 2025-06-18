@@ -1,15 +1,19 @@
 // MainMenuScreen.js
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './MainMenuScreen.css';
 import { useSound } from '../SoundProvider';
 import BackgroundCanvas from './BackgroundCanvas';
 
 function MainMenuScreen() {
+  const navigate = useNavigate();
   const { playClick, playHover } = useSound();
 
   const handleMenuClick = (action) => {
     console.log(`Menu action: ${action}`);
+    if (action === 'exit') {
+      navigate('/'); // Navigate to login screen (root path)
+    }
   };
 
   const handlePlayClick = () => {
@@ -20,33 +24,35 @@ function MainMenuScreen() {
     <>
       <BackgroundCanvas />
       <div className="main-menu-root">
-        {/* Left Menu Bar */}
-        <aside className="left-menu-bar">
-          <div className="logo-app-container">
-            <div className="hex-logo">
-              <img src="/monkey.png" style={{ width: 90, height: 90 }} alt="App logo" />
+        {/* Left Panel */}
+        <div className="main-menu-left-panel">
+          <aside className="left-menu-bar">
+            <div className="logo-app-container">
+              <div className="hex-logo">
+                <img src="/monkey.png" style={{ width: 90, height: 90 }} alt="App logo" />
+              </div>
+              <span className="app-name">Dante Duel</span>
             </div>
-            <span className="app-name">Dante Duel</span>
-          </div>
-          <nav className="menu-btns-vertical">
-            <Link to="/options" className="menu-btn" onMouseEnter={playHover} onClick={playClick}>
-              OPTIONS
-            </Link>
-            <Link to="/store" className="menu-btn" onMouseEnter={playHover} onClick={playClick}>
-              STORE
-            </Link>
-            <Link to="/tutorial" className="menu-btn" onMouseEnter={playHover} onClick={playClick}>
-              TUTORIAL
-            </Link>
-            <button
-              className="menu-btn"
-              onMouseEnter={playHover}
-              onClick={() => { playClick(); handleMenuClick('exit'); }}
-            >
-              EXIT
-            </button>
-          </nav>
-        </aside>
+            <nav className="menu-btns-vertical">
+              <Link to="/options" className="menu-btn" onMouseEnter={playHover} onClick={playClick}>
+                OPTIONS
+              </Link>
+              <Link to="/store" className="menu-btn" onMouseEnter={playHover} onClick={playClick}>
+                STORE
+              </Link>
+              <Link to="/tutorial" className="menu-btn" onMouseEnter={playHover} onClick={playClick}>
+                TUTORIAL
+              </Link>
+              <button
+                className="menu-btn"
+                onMouseEnter={playHover}
+                onClick={() => { playClick(); handleMenuClick('exit'); }}
+              >
+                EXIT
+              </button>
+            </nav>
+          </aside>
+        </div>
 
         {/* Center Content: Play and Leaderboard */}
         <main className="main-center-area">

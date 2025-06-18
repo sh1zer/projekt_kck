@@ -1,0 +1,69 @@
+/* GameScreen custom styles (add as needed) */
+
+/* GameScreen custom styles for Dante Duel color palette */
+
+:root {
+  --dd-red: #e53e3e;
+  --dd-red-dark: #c53030;
+  --dd-yellow: #ffd700;
+  --dd-dark: #232323;
+  --dd-light: #ffe4b8;
+  --dd-light2: #fff3d1;
+}
+
+.gamescreen-bg {
+  background: var(--dd-dark) !important;
+}
+
+.gamescreen-panel {
+  background: var(--dd-light) !important;
+  border-color: var(--dd-red-dark) !important;
+}
+
+.gamescreen-panel-header {
+  background: var(--dd-red) !important;
+  color: #fff !important;
+}
+
+.gamescreen-btn {
+  background: var(--dd-red) !important;
+  color: #fff !important;
+  border-radius: 12px;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+.gamescreen-btn:hover {
+  background: var(--dd-red-dark) !important;
+}
+
+.gamescreen-elo {
+  color: var(--dd-yellow) !important;
+  font-weight: bold;
+}
+
+.gamescreen-test-pass {
+  color: var(--dd-yellow) !important;
+}
+
+.gamescreen-test-fail {
+  color: var(--dd-red) !important;
+}
+
+.gamescreen-test-panel {
+  background: var(--dd-light2) !important;
+  border-color: var(--dd-red-dark) !important;
+}
+
+.gamescreen-sidebar {
+  background: var(--dd-dark) !important;
+  border-color: var(--dd-red-dark) !important;
+}
+
+.gamescreen-profile {
+  background: var(--dd-red) !important;
+  color: #fff !important;
+}
+
+.gamescreen-menu-btn:hover {
+  background: var(--dd-red-dark) !important;
+} 
