@@ -11,22 +11,35 @@ import CodingBattleInterface from './screens/GameScreen/GameScreen';
 import Options from './screens/Options';
 import './App.css';
 import { SoundProvider } from './SoundProvider';
+import BackgroundCanvas from './screens/BackgroundCanvas';
 
 function App() {
   return (
-    <SoundProvider>
-      <Router>
-        <div className="App">
-          <Routes>
-            <Route path="/login" element={<LoginScreen/>} />
-            <Route path="/main-menu" element={<MainMenuScreen/>} />
-            <Route path="/game" element={<CodingBattleInterface/>} />
-            <Route path="/options" element={<Options/>} />
-            <Route path="/" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </div>
-      </Router>
-    </SoundProvider>
+    <Router>
+      <div className="App">
+        <BackgroundCanvas />
+        <Routes>
+          <Route path="/login" element={<LoginScreen/>} />
+          <Route path="/main-menu" element={
+            <SoundProvider>
+              <MainMenuScreen/>
+            </SoundProvider>
+          } />
+          <Route path="/game" element={
+            <SoundProvider>
+              <CodingBattleInterface/>
+            </SoundProvider>
+          } />
+          <Route path="/options" element={
+            <SoundProvider>
+              <Options/>
+            </SoundProvider>
+          } />
+          <Route path="/" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
+
 export default App;
