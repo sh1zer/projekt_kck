@@ -225,3 +225,55 @@ class DuelViewSet(viewsets.ReadOnlyModelViewSet):
         duel.save()
 
         return Response(result)
+    
+    
+@api_view(['GET'])
+def user_history_view(request, username):
+    """
+    Get match history for a user by username.
+    Returns last 5 problems and win/loss statistics.
+    """
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return Response(
+            {"error": "User not found"}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    # Get all completed duels for this user
+    all_duels = Duel.objects.filter(
+        (Q(player1=user) | Q(player2=user)) & Q(status='completed')
+    ).order_by('-updated_at')
+
+    # Calculate win/loss statistics
+    total_games = all_duels.count()
+    wins = all_duels.filter(winner=user).count()
+    losses = total_games - wins
+
+    # Get last 5 duels with problem info
+    recent_duels = all_duels[:5]
+    recent_matches = []
+    
+    for duel in recent_duels:
+        opponent = duel.player2 if duel.player1 == user else duel.player1
+        match_data = {
+            "duel_id": duel.id,
+            "problem_title": duel.problem.title,
+            "problem_difficulty": duel.problem.difficulty,
+            "opponent": opponent.username,
+            "result": "win" if duel.winner == user else "loss",
+            "completed_at": duel.updated_at
+        }
+        recent_matches.append(match_data)
+
+    return Response({
+        "username": username,
+        "statistics": {
+            "total_games": total_games,
+            "wins": wins,
+            "losses": losses,
+            "win_rate": round(wins / total_games * 100, 1) if total_games > 0 else 0
+        },
+        "recent_matches": recent_matches
+    })

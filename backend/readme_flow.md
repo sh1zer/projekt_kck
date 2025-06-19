@@ -364,3 +364,49 @@ if (updatedDuel.winner) {
 **Always check response status before processing data!**
 
 ---
+
+## Bonus
+## User Match History
+
+Get match statistics and recent game history for any user by username. No authentication required.
+
+### Endpoint
+```
+GET /api/users/{username}/history/
+```
+
+### Usage
+```bash
+# Get match history for a specific user
+curl -s "$BASE_URL/api/users/player1/history/" | jq .
+```
+
+### Response Format
+```json
+{
+  "username": "player1",
+  "statistics": {
+    "total_games": 12,
+    "wins": 8,
+    "losses": 4,
+    "win_rate": 66.7
+  },
+  "recent_matches": [
+    {
+      "duel_id": 15,
+      "problem_title": "Longest Common Prefix",
+      "problem_difficulty": "Easy",
+      "opponent": "player2",
+      "result": "win",
+      "completed_at": "2025-06-19T09:30:15.123456Z"
+    }
+  ]
+}
+```
+
+### Features
+- Returns last 5 completed matches
+- Calculates total win/loss statistics and win rate
+- Shows problem details and opponent for each match
+- Public endpoint (no authentication required)
+- Returns 404 for non-existent users
