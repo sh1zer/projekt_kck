@@ -3,7 +3,6 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './MainMenuScreen.css';
 import { useSound } from '../SoundProvider';
-import BackgroundCanvas from './BackgroundCanvas';
 
 function MainMenuScreen() {
   const navigate = useNavigate();
@@ -22,7 +21,6 @@ function MainMenuScreen() {
 
   return (
     <>
-      <BackgroundCanvas />
       <div className="main-menu-root">
         {/* Left Panel */}
         <div className="main-menu-left-panel">
