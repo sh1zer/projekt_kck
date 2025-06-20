@@ -47,7 +47,7 @@ function createSymbols(count, width, height) {
       symbol: SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
       fontSize,
-      opacity: randomBetween(0.65, 0.85),
+      opacity: randomBetween(0.85, 1.0),
       fadeSpeed: randomBetween(0.0001, 0.0003),
       fadeDir: Math.random() > 0.5 ? 1 : -1
     };
@@ -99,8 +99,8 @@ const BackgroundCanvas = () => {
         sym.y += sym.dy * smoothingFactor;
         
         sym.opacity += sym.fadeSpeed * sym.fadeDir * smoothingFactor;
-        if (sym.opacity > 0.85) { sym.opacity = 0.85; sym.fadeDir = -1; }
-        if (sym.opacity < 0.65) { sym.opacity = 0.65; sym.fadeDir = 1; }
+        if (sym.opacity > 1.0) { sym.opacity = 1.0; sym.fadeDir = -1; }
+        if (sym.opacity < 0.85) { sym.opacity = 0.85; sym.fadeDir = 1; }
         
         if (sym.x < -120) sym.x = width + 120;
         if (sym.x > width + 120) sym.x = -120;

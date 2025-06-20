@@ -11,5 +11,6 @@ urlpatterns = [
     path('login/', views.login_view, name='api_login'),
     path('users/<str:username>/history/', views.user_history_view, name='user-history'),
     path('matchmaking/', views.matchmaking_view, name='matchmaking'),
+    path('matchmaking/cancel/', views.cancel_matchmaking_view, name='cancel-matchmaking'),  # Cancel matchmaking
     
 ]

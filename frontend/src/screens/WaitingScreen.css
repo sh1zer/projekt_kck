@@ -1,0 +1,66 @@
+.waiting-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: white;
+    font-size: 2rem;
+    position: relative;
+    z-index: 10;
+}
+.waiting-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(20, 20, 30, 0.72);
+    z-index: 0;
+    pointer-events: none;
+    border-radius: inherit;
+}
+.waiting-container > * {
+    position: relative;
+    z-index: 1;
+}
+
+.spinner {
+    border: 16px solid #f3f3f3;
+    border-top: 16px solid #3498db;
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+    margin-top: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.cancel-btn {
+    margin-top: 24px;
+    padding: 16px 48px;
+    background: #e53e3e;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.6rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 6px 32px 0 rgba(0,0,0,0.25), 0 1.5px 6px 0 rgba(229,62,62,0.18);
+    transition: background 0.2s, border 0.2s, box-shadow 0.2s;
+}
+.cancel-btn:hover {
+    background: #b91c1c;
+    box-shadow: 0 10px 40px 0 rgba(0,0,0,0.32), 0 2px 8px 0 rgba(229,62,62,0.22);
+}
+.debug-info {
+    margin-top: 18px;
+    color: #aaa;
+    font-size: 1rem;
+    word-break: break-all;
+} 

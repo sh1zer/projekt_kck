@@ -9,6 +9,7 @@ import LoginScreen from './screens/LoginScreen';
 import MainMenuScreen from './screens/MainMenuScreen';
 import CodingBattleInterface from './screens/GameScreen/GameScreen';
 import Options from './screens/Options';
+import WaitingScreen from './screens/WaitingScreen';
 import './App.css';
 import { SoundProvider } from './SoundProvider';
 import BackgroundCanvas from './screens/BackgroundCanvas';
@@ -25,11 +26,12 @@ function App() {
               <MainMenuScreen/>
             </SoundProvider>
           } />
-          <Route path="/game" element={
+          <Route path="/game/:duelId" element={
             <SoundProvider>
               <CodingBattleInterface/>
             </SoundProvider>
           } />
+          <Route path="/waiting" element={<WaitingScreen />} />
           <Route path="/options" element={
             <SoundProvider>
               <Options/>

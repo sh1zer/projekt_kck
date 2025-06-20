@@ -4,7 +4,10 @@
 
 1.  **Install dependencies:** `pip install -r requirements.txt`
 2.  **Run migrations:** `python manage.py migrate`
-3.  **Create test problems:** Use the admin panel (`/admin/`) to create `Problem` objects.
+3.  **Seed default problems (new):** `python manage.py seed_problems`  
+    This command inserts two C-language practice problems that match the test
+    harnesses checked into `backend/problem_tests/`. Feel free to extend or
+    modify them in the admin panel later.
 4.  **Run server:** `python manage.py runserver`
 
 ## Authentication
@@ -136,3 +139,34 @@ Retrieves a list of all available problems.
   "solution_template": "int* twoSum(...){...}"
 }
 ```
+
+---
+
+## Developer utilities (new)
+
+### `seed_problems`
+Seeds the database with a minimal set of problems so you can start testing the
+match-making flow immediately:
+
+```bash
+python manage.py seed_problems        # inserts any missing default problems
+```
+
+### `clear_active_duels`
+Quickly reset the environment without deleting the entire SQLite file:
+
+```bash
+# Mark every active duel as "abandoned" (recommended while debugging)
+python manage.py clear_active_duels
+
+# Or delete them entirely
+python manage.py clear_active_duels --delete
+```
+
+If you also need to purge the in-memory queue during a live dev session run:
+
+```bash
+python manage.py shell -c 'from api.views import MATCHMAKING_QUEUE; MATCHMAKING_QUEUE.clear()'
+```
+
+---
