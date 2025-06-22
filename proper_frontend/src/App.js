@@ -1,0 +1,45 @@
+import React from 'react';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
+import LoginScreen from './screens/LoginScreen';
+import MainMenuScreen from './screens/MainMenuScreen';
+import CodingBattleInterface from './screens/GameScreen/GameScreen';
+import Options from './screens/Options';
+import './App.css';
+import { SoundProvider } from './SoundProvider';
+import BackgroundCanvas from './screens/BackgroundCanvas';
+
+function App() {
+  return (
+    <Router>
+      <div className="App">
+        <BackgroundCanvas />
+        <Routes>
+          <Route path="/login" element={<LoginScreen/>} />
+          <Route path="/main-menu" element={
+            <SoundProvider>
+              <MainMenuScreen/>
+            </SoundProvider>
+          } />
+          <Route path="/game" element={
+            <SoundProvider>
+              <CodingBattleInterface/>
+            </SoundProvider>
+          } />
+          <Route path="/options" element={
+            <SoundProvider>
+              <Options/>
+            </SoundProvider>
+          } />
+          <Route path="/" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
