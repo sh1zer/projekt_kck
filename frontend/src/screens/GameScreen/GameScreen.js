@@ -115,7 +115,7 @@ function GameScreen() {
             <div className="editor-and-results-panel">
                 <EditorPanel
                     code={code}
-                    onCodeChange={handleCodeChange}
+                    setCode={setCode}
                     onSubmit={handleSubmit}
                     language={duel.problem && duel.problem.language ? duel.problem.language : 'c'}
                 />

@@ -229,8 +229,11 @@ def matchmaking_view(request):
             removed = remove_user_from_queue(user.id)
             if removed:
                 print(f"DEBUG: Removed {user.username} from queue since they have active duel")
-            serializer = DuelSerializer(active_duel)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            # Return a minimal payload so the front-end can reliably detect a match.
+            # The WaitingScreen component only cares about the duel id at this stage.
+            # Using a lightweight dictionary avoids large nested JSON and potential
+            # parsing issues on slower devices/browsers.
+            return Response({"id": active_duel.id}, status=status.HTTP_200_OK)
 
         print(f"DEBUG: {user.username} has no active duel, proceeding with matchmaking")
 
@@ -252,8 +255,11 @@ def matchmaking_view(request):
             if duel.player1 == user or duel.player2 == user:
                 opponent = duel.player2 if duel.player1 == user else duel.player1
                 print(f"🎉 {user.username} was matched with {opponent.username} in duel {duel.id}!")
-                serializer = DuelSerializer(duel)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                # Return the same minimal shape here as well so both players receive
+                # a consistent payload regardless of whether they were the request
+                # that actually triggered duel creation or are picking it up on a
+                # subsequent poll.
+                return Response({"id": duel.id}, status=status.HTTP_201_CREATED)
 
         # 5. User is still waiting
         final_position = find_user_in_queue(user.id)

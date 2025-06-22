@@ -32,42 +32,46 @@ function WaitingScreen() {
                     },
                 });
 
-                // Prefer the built-in JSON parser – this will throw if the
-                // payload is not valid JSON, allowing us to surface a clear
-                // error message instead of silently swallowing it.
+                const raw = await response.text();
+                console.log('Match raw ->', raw);
                 let body = {};
                 try {
-                    body = await response.clone().json();
-                } catch (e) {
-                    const raw = await response.text();
-                    setDebug(`Failed to parse JSON: ${e}, Raw: ${raw}`);
-                    console.error('Failed to parse matchmaking response', e, raw);
+                    body = raw ? JSON.parse(raw) : {};
+                } catch (err) {
+                    console.warn('Could not parse JSON, carrying on');
                 }
-                console.log('Matchmaking response body:', body);
 
-                // Only process the response if the component is still mounted
-                if (!isMounted.current) return;
-
-                setDebug(`Status: ${response.status}, ok: ${response.ok}, Body: ${JSON.stringify(body)}`);
-                console.log('🧐 evaluate success', { status: response.status, ok: response.ok, hasId: !!body.id });
-                if (response.ok && body && body.id) {
-                    setStatus('match_found');
-                    if (isMounted.current) {
-                        const targetPath = `/game/${body.id}`;
-                        console.log('🚀 Navigating to', targetPath);
-                        // Primary navigation via React Router
-                        navigate(targetPath);
-                        // Fallback in case React Router navigation fails (e.g. due to
-                        // being in a different router context in dev or HMR glitches).
-                        setTimeout(() => {
-                            if (window.location.pathname !== targetPath) {
-                                console.warn('React-Router navigation did not change URL, forcing hard redirect.');
-                                window.location.href = targetPath;
-                            }
-                        }, 100);
+                // Always check for an active duel after each poll regardless of body
+                const checkActiveDuel = async () => {
+                    try {
+                        const listResp = await fetch('/api/duels/', {
+                            headers: { 'Authorization': `Bearer ${token}` },
+                        });
+                        if (!listResp.ok) return null;
+                        const duels = await listResp.json();
+                        return duels.find(d => d.status === 'active');
+                    } catch (err) {
+                        console.error('Active duel lookup failed:', err);
+                        return null;
                     }
-                } else if (response.status !== 202) {
-                    setDebug(`Error matchmaking: ${response.status}, Body: ${JSON.stringify(body)}`);
+                };
+
+                let duelId = body.id;
+                if (!duelId && (response.status === 200 || response.status === 201)) {
+                    const active = await checkActiveDuel();
+                    duelId = active ? active.id : null;
+                }
+
+                if (duelId) {
+                    window.location.href = `/game/${duelId}`;
+                    return;
+                }
+
+                // Update debug info for 202 (waiting) state
+                if (response.status === 202) {
+                    setDebug(`Waiting... queue pos ${body.queue_position || '?'} / size ${body.queue_size || '?'}`);
+                } else if (!duelId) {
+                    setDebug(`Still no duel. Resp ${response.status}`);
                 }
             } catch (error) {
                 if (isMounted.current) {
