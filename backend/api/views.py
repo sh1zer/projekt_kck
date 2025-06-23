@@ -309,6 +309,28 @@ class DuelViewSet(viewsets.ReadOnlyModelViewSet):
         Real system would require rewrite
         """
         duel = self.get_object()
+
+        # -------------------------------------------------------------
+        # OPTIONAL FAST PATH
+        # -------------------------------------------------------------
+        # The front-end often needs to load the initial duel payload as
+        # quickly as possible right after navigation to the game screen.
+        # Waiting up to 30 s (the default long-poll loop below) makes the
+        # first paint feel extremely sluggish. If the client indicates via
+        # query param `?poll=false` (or any falsy equivalent) that it
+        # doesn't want to long-poll, we immediately return the current
+        # serializer data.
+        #
+        # Examples:
+        #   GET /api/duels/42/?poll=false   -> immediate response
+        #   GET /api/duels/42/              -> long-polling response (old behaviour)
+        # -------------------------------------------------------------
+
+        poll_param = request.query_params.get("poll", "true").lower()
+        if poll_param in {"0", "false", "no"}:
+            serializer = self.get_serializer(duel)
+            return Response(serializer.data)
+
         initial_update_time = duel.updated_at
 
         # Poll for up to 30 seconds, checking for changes every second.

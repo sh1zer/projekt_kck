@@ -36,14 +36,15 @@ export default function EditorPanel({ code, setCode, editorRef, editorContainerR
 
   function handleMonacoDidMount(editor, monaco) {
     monaco.editor.setTheme('dante-dark');
+    if (editorRef) editorRef.current = editor;
     if (handleEditorDidMount) handleEditorDidMount(editor, monaco);
   }
 
   return (
     <div style={{
-      background: '#232323', // Dark grey background for window2
+      background: '#232323', // outer
       borderRadius: '8px',
-      padding: '1rem 1rem 1rem 1rem',
+      padding: '1rem',
       width: '100%',
       boxSizing: 'border-box',
       display: 'flex',
@@ -52,31 +53,20 @@ export default function EditorPanel({ code, setCode, editorRef, editorContainerR
       flex: 1,
       minHeight: 0,
     }}>
-      {/* Level 1 - Header Panel with Fixed Height */}
+      {/* header */}
       <div style={{
-        height: '2rem', // Fixed height for Level 1 panel
+        height: '2rem',
         display: 'flex',
-        alignItems: 'flex-end', // Align content to bottom of the panel
-        paddingRight: '1.5rem', // Move content to the right
+        alignItems: 'flex-end',
+        paddingRight: '1.5rem',
         paddingLeft: '1.5rem',
-        paddingBottom: '0.25rem', // Fine-tune vertical position
-        marginBottom: '1rem', // Gap between Level 1 and blue panel
+        paddingBottom: '0.25rem',
+        marginBottom: '1rem',
       }}>
         <div className="flex items-center justify-between w-full" style={{ color: '#fff' }}>
           <div className="flex items-center gap-2">
             <span className="text-m font-semibold tracking-wide">Code</span>
-            <span 
-              className="text-xs" 
-              style={{
-                background: '#ffd700',
-                color: '#232323',
-                padding: '2px 8px',
-                borderRadius: '6px',
-                marginLeft: '8px'
-              }}
-            >
-              C
-            </span>
+            <span className="text-xs" style={{ background: '#ffd700', color: '#232323', padding: '2px 8px', borderRadius: '6px', marginLeft: '8px' }}>C</span>
           </div>
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-white" />
@@ -84,45 +74,27 @@ export default function EditorPanel({ code, setCode, editorRef, editorContainerR
           </div>
         </div>
       </div>
-
-      {/* Blue Panel with Monaco Editor - Same style as ProblemPanel */}
-      <div style={{
-        background: '#101a28', // Same blue background as ProblemPanel
-        borderRadius: '8px',
-        padding: '1rem',
-        flex: 1,
-        minHeight: 0,
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
-        <div ref={editorContainerRef} style={{
-          flex: 1,
-          minHeight: 0,
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
+      {/* editor container */}
+      <div style={{ background: '#101a28', borderRadius: '8px', padding: '1rem', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+        <div ref={editorContainerRef} style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           <MonacoEditor
             height="100%"
             width="100%"
             language="c"
             theme="vs-dark"
             value={code}
-            onChange={(value) => setCode(value || "")}
+            onChange={(val) => setCode(val || '')}
             beforeMount={handleMonacoWillMount}
             onMount={handleMonacoDidMount}
             options={{
               fontSize: 14,
               minimap: { enabled: false },
+              wordWrap: 'on',
               scrollBeyondLastLine: false,
               automaticLayout: true,
-              wordWrap: 'on',
               fontFamily: 'Fira Mono, monospace',
               lineNumbers: 'on',
               tabSize: 4,
-              scrollbar: {
-                vertical: 'auto',
-                horizontal: 'auto',
-              },
               overviewRulerBorder: false,
               renderLineHighlight: 'all',
               renderIndentGuides: true,
