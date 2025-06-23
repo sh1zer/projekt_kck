@@ -1,9 +1,7 @@
 import os
 import time
 from datetime import datetime, timedelta, timezone
-import logging
-
-logger = logging.getLogger(__name__)
+import threading
 
 from django.db.models import Q
 from django.contrib.auth.models import User
@@ -18,6 +16,28 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Problem, Duel, DuelSubmission
 from .serializers import ProblemSerializer, DuelSerializer
 from .code_executor import execute_submission
+
+from django.utils import timezone
+
+# -------------------------------------------------
+# Duel staleness configuration
+DUEL_TTL = timedelta(minutes=10)          # how long an 'active' duel stays valid
+STALE_STATES = {'active'}                 # states that can become stale
+ABANDONED_STATE = 'abandoned'             # make sure this is in your Duel.status choices
+# -------------------------------------------------
+
+def _expire_stale_duel(duel):
+    """
+    If `duel` is older than DUEL_TTL, mark it as abandoned and return None.
+    Otherwise return the (still valid) duel object.
+    """
+    if duel and duel.status in STALE_STATES:
+        if duel.updated_at < timezone.now() - DUEL_TTL:
+            duel.status = ABANDONED_STATE
+            duel.save(update_fields=['status', 'updated_at'])
+            return None
+    return duel
+
 
 # Dummy credentials for proof of concept
 DUMMY_CREDENTIALS = {
@@ -93,51 +113,182 @@ class ProblemViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(difficulty=difficulty)
         return queryset
 
-MATCHMAKING_QUEUE = []
+MATCHMAKING_QUEUE = []  # List of dicts: {'id': user.id, 'username': user.username}
+MATCHMAKING_LOCK = threading.Lock()  # Thread safety for queue operations
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def matchmaking_view(request):
-    """
-    A unified endpoint to handle joining the queue and checking match status.
-    The client should call this endpoint repeatedly until a duel is returned.
-    """
-    user = request.user
+def find_user_in_queue(user_id):
+    """Helper function to find a user in the queue by ID"""
+    print(f"DEBUG: Looking for user {user_id} in queue: {MATCHMAKING_QUEUE}")
+    for i, user_info in enumerate(MATCHMAKING_QUEUE):
+        if user_info['id'] == user_id:
+            print(f"DEBUG: Found user {user_id} at position {i}")
+            return i
+    print(f"DEBUG: User {user_id} not found in queue")
+    return -1
 
-    active_duel = Duel.objects.filter(
-        (Q(player1=user) | Q(player2=user)) & Q(status='active')
-    ).first()
-    if active_duel:
-        serializer = DuelSerializer(active_duel)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+def remove_user_from_queue(user_id):
+    """Helper function to safely remove a user from the queue"""
+    print(f"DEBUG: Attempting to remove user {user_id} from queue: {MATCHMAKING_QUEUE}")
+    index = find_user_in_queue(user_id)
+    if index >= 0:
+        removed_user = MATCHMAKING_QUEUE.pop(index)
+        print(f"DEBUG: Removed user {removed_user} from queue. Queue now: {MATCHMAKING_QUEUE}")
+        return removed_user
+    print(f"DEBUG: User {user_id} was not in queue, nothing to remove")
+    return None
 
-    if user not in MATCHMAKING_QUEUE:
-        MATCHMAKING_QUEUE.append(user)
+def process_matchmaking_queue():
+    """Process the queue and create matches when possible"""
+    print(f"DEBUG: Starting queue processing. Current queue: {MATCHMAKING_QUEUE}")
+    created_duels = []
+    
+    while len(MATCHMAKING_QUEUE) >= 2:
+        print(f"DEBUG: Queue has {len(MATCHMAKING_QUEUE)} players, attempting to match")
+        player1_info = MATCHMAKING_QUEUE.pop(0)
+        player2_info = MATCHMAKING_QUEUE.pop(0)
+        print(f"DEBUG: Popped players for matching: {player1_info} vs {player2_info}")
+        
+        try:
+            player1 = User.objects.get(id=player1_info['id'])
+            player2 = User.objects.get(id=player2_info['id'])
+            print(f"DEBUG: Successfully retrieved user objects: {player1.username} vs {player2.username}")
+        except User.DoesNotExist as e:
+            # If user doesn't exist, skip them
+            print(f"WARNING: User not found during matchmaking: {player1_info} or {player2_info}. Error: {e}")
+            continue
 
-    if len(MATCHMAKING_QUEUE) >= 2:
-        player1 = MATCHMAKING_QUEUE.pop(0)
-        player2 = MATCHMAKING_QUEUE.pop(0)
+        # Check if either player is already in an active duel
+        player1_duel = _expire_stale_duel(
+        Duel.objects.filter(
+            (Q(player1=player1) | Q(player2=player1)) & Q(status='active')
+        ).first()
+        )
 
+        player2_duel = _expire_stale_duel(
+            Duel.objects.filter(
+                (Q(player1=player2) | Q(player2=player2)) & Q(status='active')
+            ).first()
+        )
+
+
+        print(f"DEBUG: Duel check - {player1.username} has active duel: {player1_duel is not None}")
+        print(f"DEBUG: Duel check - {player2.username} has active duel: {player2_duel is not None}")
+
+        if player1_duel or player2_duel:
+            # If either is in a duel, put the one who is not back in the queue
+            if not player1_duel:
+                MATCHMAKING_QUEUE.insert(0, player1_info)
+                print(f"DEBUG: Put {player1.username} back in queue (not in active duel)")
+            if not player2_duel:
+                MATCHMAKING_QUEUE.insert(0, player2_info)
+                print(f"DEBUG: Put {player2.username} back in queue (not in active duel)")
+            print(f"INFO: One or both players already in a duel. Queue now: {MATCHMAKING_QUEUE}")
+            continue
+
+        # Neither is in a duel, create a new duel
+        print(f"DEBUG: Both players are free, creating duel between {player1.username} and {player2.username}")
         problem = Problem.objects.order_by('?').first()
         if not problem:
-            return Response(
-                {"error": "No problems available to start a duel."}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-        
+            # Put both players back in queue if no problem available
+            MATCHMAKING_QUEUE.insert(0, player1_info)
+            MATCHMAKING_QUEUE.insert(0, player2_info)
+            print("ERROR: No problems available to start a duel, putting players back in queue")
+            break
+            
         new_duel = Duel.objects.create(
             problem=problem,
             player1=player1,
             player2=player2,
             status='active'
         )
-        serializer = DuelSerializer(new_duel)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        created_duels.append(new_duel)
+        print(f"✅ Created duel {new_duel.id} between {player1.username} and {player2.username}. Problem: {problem.title}. Queue now: {MATCHMAKING_QUEUE}")
+    
+    print(f"DEBUG: Queue processing complete. Created {len(created_duels)} duels. Final queue: {MATCHMAKING_QUEUE}")
+    return created_duels
 
-    return Response(
-        {"status": "waiting_for_opponent"}, 
-        status=status.HTTP_202_ACCEPTED
-    )
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def matchmaking_view(request):
+    user = request.user
+    
+    with MATCHMAKING_LOCK:
+        print(f"🎯 MATCHMAKING START: User {user.username} (id={user.id}) called matchmaking")
+        print(f"DEBUG: Current queue state: {MATCHMAKING_QUEUE}")
+
+        # 1. Check if user is already in an active duel
+        print(f"DEBUG: Checking if {user.username} has an active duel...")
+        active_duel = Duel.objects.filter(
+            (Q(player1=user) | Q(player2=user)) & Q(status='active')
+        ).first()
+        active_duel = _expire_stale_duel(active_duel)
+        if active_duel:
+            opponent = active_duel.player1.username if active_duel.player2 == user else active_duel.player2.username
+            print(f"✅ {user.username} is already in active duel {active_duel.id} (vs {opponent})")
+            # Remove user from queue if they're somehow still there
+            removed = remove_user_from_queue(user.id)
+            if removed:
+                print(f"DEBUG: Removed {user.username} from queue since they have active duel")
+            # Return a minimal payload so the front-end can reliably detect a match.
+            # The WaitingScreen component only cares about the duel id at this stage.
+            # Using a lightweight dictionary avoids large nested JSON and potential
+            # parsing issues on slower devices/browsers.
+            return Response({"id": active_duel.id}, status=status.HTTP_200_OK)
+
+        print(f"DEBUG: {user.username} has no active duel, proceeding with matchmaking")
+
+        # 2. Add user to queue if not already in it
+        user_position = find_user_in_queue(user.id)
+        if user_position == -1:
+            MATCHMAKING_QUEUE.append({'id': user.id, 'username': user.username})
+            print(f"➕ Added {user.username} to queue. Queue now: {MATCHMAKING_QUEUE}")
+        else:
+            print(f"DEBUG: {user.username} already in queue at position {user_position}")
+
+        # 3. Process the matchmaking queue
+        print("🔄 Starting queue processing...")
+        created_duels = process_matchmaking_queue()
+        
+        # 4. Check if this user got matched in any of the created duels
+        print(f"DEBUG: Checking if {user.username} was matched in any of {len(created_duels)} created duels")
+        for duel in created_duels:
+            if duel.player1 == user or duel.player2 == user:
+                opponent = duel.player2 if duel.player1 == user else duel.player1
+                print(f"🎉 {user.username} was matched with {opponent.username} in duel {duel.id}!")
+                # Return the same minimal shape here as well so both players receive
+                # a consistent payload regardless of whether they were the request
+                # that actually triggered duel creation or are picking it up on a
+                # subsequent poll.
+                return Response({"id": duel.id}, status=status.HTTP_201_CREATED)
+
+        # 5. User is still waiting
+        final_position = find_user_in_queue(user.id)
+        print(f"⏳ {user.username} is still waiting (position {final_position + 1}). Queue: {MATCHMAKING_QUEUE}")
+        return Response(
+            {
+                "status": "waiting_for_opponent", 
+                "queue_position": final_position + 1,
+                "queue_size": len(MATCHMAKING_QUEUE)
+            }, 
+            status=status.HTTP_202_ACCEPTED
+        )
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def cancel_matchmaking_view(request):
+    user = request.user
+    
+    with MATCHMAKING_LOCK:
+        print(f"🚫 CANCEL MATCHMAKING: {user.username} requested to cancel matchmaking")
+        print(f"DEBUG: Queue before cancellation: {MATCHMAKING_QUEUE}")
+        
+        removed_user = remove_user_from_queue(user.id)
+        if removed_user:
+            print(f"✅ {user.username} successfully cancelled matchmaking. Queue now: {MATCHMAKING_QUEUE}")
+            return Response({"status": "cancelled"}, status=status.HTTP_200_OK)
+        else:
+            print(f"⚠️ {user.username} tried to cancel but was not in queue. Queue: {MATCHMAKING_QUEUE}")
+            return Response({"status": "not_in_queue"}, status=status.HTTP_200_OK)
 
 class DuelViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for viewing Duels and submitting code."""
@@ -158,6 +309,28 @@ class DuelViewSet(viewsets.ReadOnlyModelViewSet):
         Real system would require rewrite
         """
         duel = self.get_object()
+
+        # -------------------------------------------------------------
+        # OPTIONAL FAST PATH
+        # -------------------------------------------------------------
+        # The front-end often needs to load the initial duel payload as
+        # quickly as possible right after navigation to the game screen.
+        # Waiting up to 30 s (the default long-poll loop below) makes the
+        # first paint feel extremely sluggish. If the client indicates via
+        # query param `?poll=false` (or any falsy equivalent) that it
+        # doesn't want to long-poll, we immediately return the current
+        # serializer data.
+        #
+        # Examples:
+        #   GET /api/duels/42/?poll=false   -> immediate response
+        #   GET /api/duels/42/              -> long-polling response (old behaviour)
+        # -------------------------------------------------------------
+
+        poll_param = request.query_params.get("poll", "true").lower()
+        if poll_param in {"0", "false", "no"}:
+            serializer = self.get_serializer(duel)
+            return Response(serializer.data)
+
         initial_update_time = duel.updated_at
 
         # Poll for up to 30 seconds, checking for changes every second.
@@ -178,13 +351,17 @@ class DuelViewSet(viewsets.ReadOnlyModelViewSet):
         duel = self.get_object()
         user = request.user
 
+        print(f"💻 CODE SUBMISSION: {user.username} submitting code for duel {duel.id}")
+
         if duel.status != 'active':
+            print(f"❌ {user.username} tried to submit to inactive duel {duel.id} (status: {duel.status})")
             return Response(
                 {"error": "This duel is not active."}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         
         if user != duel.player1 and user != duel.player2:
+            print(f"❌ {user.username} tried to submit to duel {duel.id} but is not a participant")
             return Response(
                 {"error": "You are not a participant in this duel."}, 
                 status=status.HTTP_403_FORBIDDEN
@@ -192,10 +369,13 @@ class DuelViewSet(viewsets.ReadOnlyModelViewSet):
 
         user_code = request.data.get('code')
         if not user_code:
+            print(f"❌ {user.username} submitted empty code to duel {duel.id}")
             return Response(
                 {"error": "No code provided."}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+        print(f"DEBUG: Executing code for {user.username} in duel {duel.id}")
 
         # Execute the code and get the result.
         test_file_path = os.path.join(
@@ -207,6 +387,8 @@ class DuelViewSet(viewsets.ReadOnlyModelViewSet):
             user_code, test_file_path, timeout=duel.problem.time_limit
         )
 
+        print(f"DEBUG: Code execution result for {user.username}: {result.get('status', 'unknown')}")
+
         # Log the submission attempt.
         DuelSubmission.objects.create(
             duel=duel,
@@ -217,12 +399,23 @@ class DuelViewSet(viewsets.ReadOnlyModelViewSet):
 
         # The first player to pass all tests wins.
         if result.get("status") == "success":
+            print(f"🎉 {user.username} WON duel {duel.id}! Marking duel as completed.")
             duel.winner = user
             duel.status = 'completed'
+            
+            # Remove both players from matchmaking queue if they're somehow still there
+            with MATCHMAKING_LOCK:
+                removed1 = remove_user_from_queue(duel.player1.id)
+                removed2 = remove_user_from_queue(duel.player2.id)
+                if removed1 or removed2:
+                    print(f"DEBUG: Cleaned up queue after duel completion: removed {removed1 or 'none'} and {removed2 or 'none'}")
+        else:
+            print(f"❌ {user.username}'s submission failed in duel {duel.id}: {result.get('error', 'unknown error')}")
         
         # Save changes. This updates the 'updated_at' timestamp, which
         # notifies any clients using the long polling 'retrieve' endpoint.
         duel.save()
+        print(f"DEBUG: Duel {duel.id} saved with updated status")
 
         return Response(result)
     

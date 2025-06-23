@@ -6,13 +6,11 @@ export default function ProblemPanel(props) {
       background:'#101a28',
       borderRadius:'8px',
       padding:'1rem 1rem 1rem 1rem',
-      maxWidth:'900px',
       width:'100%',
       boxSizing:'border-box',
       display:'flex',
       flexDirection:'column',
       height:'100%',
-      margin:'0 auto',
       flex: 1,
       minHeight: 0,
       ...props?.style

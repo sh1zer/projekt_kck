@@ -71,7 +71,7 @@
   color: white;
   padding: 0;
   border-radius: 14px;
-  font-size: 35px;
+  font-size: 35px !important;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s;

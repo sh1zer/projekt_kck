@@ -1,6 +1,4 @@
-/* GameScreen custom styles (add as needed) */
-
-/* GameScreen custom styles for Dante Duel color palette */
+/* GameScreen custom styles (copied from proper_frontend) */
 
 :root {
   --dd-red: #e53e3e;
@@ -16,8 +14,8 @@
 }
 
 .gamescreen-panel {
-  background: var(--dd-light) !important;
-  border-color: var(--dd-red-dark) !important;
+  background: #101a28 !important;
+  border: 1px solid #232323 !important;
 }
 
 .gamescreen-panel-header {
@@ -66,4 +64,146 @@
 
 .gamescreen-menu-btn:hover {
   background: var(--dd-red-dark) !important;
+}
+
+.game-screen {
+  position: relative;
+  z-index: 1; /* ensure it sits above BackgroundCanvas (z-index 0) */
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  height: 100vh;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Added layout for editor + results section */
+.editor-and-results-panel {
+  display: flex;
+  flex: 1;
+  gap: 1rem;
+  min-height: 0; /* allow children to control scrolling */
+}
+.editor-and-results-panel > * {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Test results panel basic styling */
+.test-results-panel {
+  background: #101a28;
+  border-radius: 8px;
+  padding: 1rem 1rem 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: #fff;
+  overflow-y: auto;
+  border: 1px solid #232323;
+}
+
+.test-results-panel .results-summary {
+  margin-bottom: 0.75rem;
+  font-weight: bold;
+}
+
+.test-results-panel .test-case {
+  border-radius: 6px;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  background: #0d1521; /* slightly darker than #101a28 */
+  color: #fff;
+}
+.test-results-panel .test-case.pass {
+  border: 1px solid #38a169; /* green */
+}
+.test-results-panel .test-case.fail {
+  border: 1px solid #e53e3e; /* red */
+}
+
+/* Sections for two-row layout */
+.top-section,
+.bottom-section {
+  display: flex;
+  flex: 1;
+  gap: 1rem;
+  min-height: 0;
+}
+
+.top-section > *,
+.bottom-section > * {
+  flex: 1;
+  min-height: 0;
+}
+
+/* top bottom ratios */
+.top-section {
+  flex-basis: 60%;
+}
+.bottom-section {
+  flex-basis: 40%;
+}
+
+/* Battle header */
+.battle-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #232323;
+  border-radius: 8px 8px 0 0;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+}
+.left-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.menu-btn {
+  background: var(--dd-red);
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.25rem 0.5rem;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+.menu-btn:hover {
+  background: var(--dd-red-dark);
+}
+.header-icon {
+  height: 28px;
+  width: 28px;
+  margin-left: 1.25rem;
+  margin-right: 0.05rem;
+}
+.brand {
+  font-size: 0.875rem;
+  font-weight: bold;
+}
+.status-dot {
+  width: 12px;
+  height: 12px;
+  background: orange;
+  border-radius: 50%;
+  margin-left: 0.5rem;
+  animation: pulse 1s infinite;
+}
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+.run-code-btn {
+  background: var(--dd-red);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+.run-code-btn:hover {
+  background: var(--dd-red-dark);
 } 

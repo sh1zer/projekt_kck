@@ -1,5 +1,5 @@
 // MainMenuScreen.js
-import React from 'react';
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import './MainMenuScreen.css';
 import { useSound } from '../SoundProvider';
@@ -16,7 +16,8 @@ function MainMenuScreen() {
   };
 
   const handlePlayClick = () => {
-    console.log('Starting game...');
+    playClick();
+    navigate('/waiting');
   };
 
   return (
@@ -55,14 +56,13 @@ function MainMenuScreen() {
         {/* Center Content: Play and Leaderboard */}
         <main className="main-center-area">
           <div className="center-column">
-            <Link
-              to="/game"
+            <button
               className="play-btn"
               onMouseEnter={playHover}
-              onClick={() => { playClick(); handlePlayClick(); }}
+              onClick={handlePlayClick}
             >
               PLAY
-            </Link>
+            </button>
             <section className="leaderboard-section">
               <div className="leaderboard-header">
                 <span className="trophy-icon">🏆</span>
