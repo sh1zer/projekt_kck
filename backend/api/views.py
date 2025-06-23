@@ -21,7 +21,7 @@ from django.utils import timezone
 
 # -------------------------------------------------
 # Duel staleness configuration
-DUEL_TTL = timedelta(minutes=10)          # how long an 'active' duel stays valid
+DUEL_TTL = timedelta(minutes=5)          # how long an 'active' duel stays valid
 STALE_STATES = {'active'}                 # states that can become stale
 ABANDONED_STATE = 'abandoned'             # make sure this is in your Duel.status choices
 # -------------------------------------------------

@@ -9,34 +9,87 @@ export default function EditorPanel({
   editorContainerRef, 
   handleEditorWillMount, 
   handleEditorDidMount,
-  duel
+  duel 
 }) {
-  const [timeLeft, setTimeLeft] = useState(null);
+  const [timeLeft, setTimeLeft] = useState('--:--');
+  const [isTimeUp, setIsTimeUp] = useState(false);
 
-  // Timer logic
+  // Fixed timer logic using start_time
   useEffect(() => {
-    if (!duel?.problem?.time_limit || !duel?.created_at) return;
+    if (!duel?.problem?.time_limit || !duel?.start_time) {
+      console.log('Timer debug - missing data:', {
+        timeLimit: duel?.problem?.time_limit,
+        startTime: duel?.start_time,
+        duelStatus: duel?.status
+      });
+      setTimeLeft('--:--');
+      return;
+    }
+
+    // If game is already completed, don't run timer
+    if (duel.status === 'completed') {
+      setTimeLeft('00:00');
+      return;
+    }
+
+    let interval;
 
     const updateTimer = () => {
-      const startTime = new Date(duel.created_at);
-      const timeLimit = duel.problem.time_limit * 60 * 1000; // Convert minutes to ms
-      const elapsed = Date.now() - startTime.getTime();
-      const remaining = Math.max(0, timeLimit - elapsed);
-      
-      if (remaining === 0) {
-        setTimeLeft('00:00');
-        return;
-      }
+      try {
+        // Use start_time from API
+        const startTime = new Date(duel.start_time);
+        const timeLimit = duel.problem.time_limit * 60 * 1000; // Convert minutes to milliseconds
+        const elapsed = Date.now() - startTime.getTime();
+        const remaining = Math.max(0, timeLimit - elapsed);
+        
+        console.log('Timer debug:', {
+          startTime: startTime.toISOString(),
+          currentTime: new Date().toISOString(),
+          timeLimit: duel.problem.time_limit,
+          elapsed: Math.floor(elapsed / 1000),
+          remaining: Math.floor(remaining / 1000)
+        });
 
-      const minutes = Math.floor(remaining / 60000);
-      const seconds = Math.floor((remaining % 60000) / 1000);
-      setTimeLeft(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+        if (remaining <= 0) {
+          setTimeLeft('00:00');
+          setIsTimeUp(true);
+          return;
+        }
+
+        const minutes = Math.floor(remaining / 60000);
+        const seconds = Math.floor((remaining % 60000) / 1000);
+        const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        setTimeLeft(timeString);
+        setIsTimeUp(false);
+      } catch (error) {
+        console.error('Timer error:', error);
+        setTimeLeft('--:--');
+      }
     };
 
+    // Update immediately, then every second
     updateTimer();
-    const interval = setInterval(updateTimer, 1000);
-    return () => clearInterval(interval);
-  }, [duel]);
+    interval = setInterval(updateTimer, 1000);
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [duel?.start_time, duel?.problem?.time_limit, duel?.status]);
+
+  // Determine timer color based on time remaining
+  const getTimerColor = () => {
+    if (timeLeft === '--:--') return '#ffffff';
+    if (isTimeUp) return '#ef4444'; // red
+    
+    const [minutes, seconds] = timeLeft.split(':').map(Number);
+    const totalSeconds = minutes * 60 + seconds;
+    
+    if (totalSeconds < 60) return '#ef4444'; // red - under 1 minute
+    if (totalSeconds < 120) return '#f97316'; // orange - under 2 minutes  
+    if (totalSeconds < 300) return '#eab308'; // yellow - under 5 minutes
+    return '#ffffff'; // white - plenty of time
+  };
 
   // Custom Monaco theme for Dante Duel
   function handleMonacoWillMount(monaco) {
@@ -77,7 +130,7 @@ export default function EditorPanel({
 
   return (
     <div style={{
-      background: '#232323', // outer
+      background: '#232323',
       borderRadius: '8px',
       padding: '1rem',
       width: '100%',
@@ -104,39 +157,60 @@ export default function EditorPanel({
             <span className="text-xs" style={{ background: '#ffd700', color: '#232323', padding: '2px 8px', borderRadius: '6px', marginLeft: '8px' }}>C</span>
           </div>
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-white" />
-            <span className={`text-sm ${timeLeft === '00:00' ? 'text-red-400' : ''}`}>
-              {timeLeft || '--:--'}
+            <Clock 
+              className="w-4 h-4" 
+              style={{ 
+                color: getTimerColor(),
+                filter: isTimeUp ? 'drop-shadow(0 0 4px #ef4444)' : 'none'
+              }} 
+            />
+            <span 
+              className={`text-sm font-mono ${isTimeUp ? 'animate-pulse' : ''}`}
+              style={{ 
+                color: getTimerColor(),
+                fontWeight: isTimeUp ? 'bold' : 'normal'
+              }}
+            >
+              {timeLeft}
             </span>
           </div>
         </div>
       </div>
+      
+      {/* Time warning overlay */}
+      {isTimeUp && (
+        <div className="absolute top-16 left-4 right-4 bg-red-600 text-white p-2 rounded text-center text-sm font-bold animate-pulse z-10">
+          TIME'S UP!
+        </div>
+      )}
+      
       {/* editor container */}
-      <div style={{ background: '#101a28', borderRadius: '8px', padding: '1rem', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ background: '#101a28', borderRadius: '8px', padding: '1rem', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', position: 'relative' }}>
         <div ref={editorContainerRef} style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-        <MonacoEditor
-              height="100%"
-              width="100%"
-              language="c"
-              theme="vs-dark"
-              value={code || ''} // Ensure we always have a string
-              onChange={(val) => setCode(val || '')}
-              beforeMount={handleMonacoWillMount}
-              onMount={handleMonacoDidMount}
-              options={{
-                  fontSize: 14,
-                  minimap: { enabled: false },
-                  wordWrap: 'on',
-                  scrollBeyondLastLine: false,
-                  automaticLayout: true,
-                  fontFamily: 'Fira Mono, monospace',
-                  lineNumbers: 'on',
-                  tabSize: 4,
-                  overviewRulerBorder: false,
-                  renderLineHighlight: 'all',
-                  renderIndentGuides: true,
-                  renderLineHighlightOnlyWhenFocus: true,
-              }}
+          <MonacoEditor
+            height="100%"
+            width="100%"
+            language="c"
+            theme="vs-dark"
+            value={code}
+            onChange={(val) => setCode(val || '')}
+            beforeMount={handleMonacoWillMount}
+            onMount={handleMonacoDidMount}
+            options={{
+              fontSize: 14,
+              minimap: { enabled: false },
+              wordWrap: 'on',
+              scrollBeyondLastLine: false,
+              automaticLayout: true,
+              fontFamily: 'Fira Mono, monospace',
+              lineNumbers: 'on',
+              tabSize: 4,
+              overviewRulerBorder: false,
+              renderLineHighlight: 'all',
+              renderIndentGuides: true,
+              renderLineHighlightOnlyWhenFocus: true,
+              readOnly: isTimeUp, // Disable editing when time is up
+            }}
           />
         </div>
       </div>

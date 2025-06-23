@@ -429,6 +429,29 @@ export default function GameScreen() {
                     onClose={() => setShowVictoryDefeat(false)}
                 />
             )}
+            {/* DEBUG DATA*/}
+            {/*duel && (
+                <div style={{ 
+                    position: 'fixed', 
+                    top: '10px', 
+                    right: '10px', 
+                    background: 'rgba(0,0,0,0.9)', 
+                    color: 'white', 
+                    padding: '10px', 
+                    fontSize: '11px', 
+                    zIndex: 9999,
+                    borderRadius: '4px',
+                    fontFamily: 'monospace',
+                    minWidth: '250px',
+                    maxHeight: '400px',
+                    overflow: 'auto'
+                }}>
+                    <div><strong>All Duel Fields:</strong></div>
+                    <pre style={{ fontSize: '10px', whiteSpace: 'pre-wrap' }}>
+                        {JSON.stringify(duel, null, 2)}
+                    </pre>
+                </div>
+            )*/}
         </div>
     );
 }
