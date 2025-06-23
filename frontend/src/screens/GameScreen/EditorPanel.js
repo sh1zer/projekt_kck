@@ -1,8 +1,43 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import MonacoEditor from '@monaco-editor/react';
 import { Clock } from 'lucide-react';
 
-export default function EditorPanel({ code, setCode, editorRef, editorContainerRef, handleEditorWillMount, handleEditorDidMount }) {
+export default function EditorPanel({ 
+  code, 
+  setCode, 
+  editorRef, 
+  editorContainerRef, 
+  handleEditorWillMount, 
+  handleEditorDidMount,
+  duel
+}) {
+  const [timeLeft, setTimeLeft] = useState(null);
+
+  // Timer logic
+  useEffect(() => {
+    if (!duel?.problem?.time_limit || !duel?.created_at) return;
+
+    const updateTimer = () => {
+      const startTime = new Date(duel.created_at);
+      const timeLimit = duel.problem.time_limit * 60 * 1000; // Convert minutes to ms
+      const elapsed = Date.now() - startTime.getTime();
+      const remaining = Math.max(0, timeLimit - elapsed);
+      
+      if (remaining === 0) {
+        setTimeLeft('00:00');
+        return;
+      }
+
+      const minutes = Math.floor(remaining / 60000);
+      const seconds = Math.floor((remaining % 60000) / 1000);
+      setTimeLeft(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [duel]);
+
   // Custom Monaco theme for Dante Duel
   function handleMonacoWillMount(monaco) {
     monaco.editor.defineTheme('dante-dark', {
@@ -70,36 +105,38 @@ export default function EditorPanel({ code, setCode, editorRef, editorContainerR
           </div>
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-white" />
-            <span className="text-sm">15:42</span>
+            <span className={`text-sm ${timeLeft === '00:00' ? 'text-red-400' : ''}`}>
+              {timeLeft || '--:--'}
+            </span>
           </div>
         </div>
       </div>
       {/* editor container */}
       <div style={{ background: '#101a28', borderRadius: '8px', padding: '1rem', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         <div ref={editorContainerRef} style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-          <MonacoEditor
-            height="100%"
-            width="100%"
-            language="c"
-            theme="vs-dark"
-            value={code}
-            onChange={(val) => setCode(val || '')}
-            beforeMount={handleMonacoWillMount}
-            onMount={handleMonacoDidMount}
-            options={{
-              fontSize: 14,
-              minimap: { enabled: false },
-              wordWrap: 'on',
-              scrollBeyondLastLine: false,
-              automaticLayout: true,
-              fontFamily: 'Fira Mono, monospace',
-              lineNumbers: 'on',
-              tabSize: 4,
-              overviewRulerBorder: false,
-              renderLineHighlight: 'all',
-              renderIndentGuides: true,
-              renderLineHighlightOnlyWhenFocus: true,
-            }}
+        <MonacoEditor
+              height="100%"
+              width="100%"
+              language="c"
+              theme="vs-dark"
+              value={code || ''} // Ensure we always have a string
+              onChange={(val) => setCode(val || '')}
+              beforeMount={handleMonacoWillMount}
+              onMount={handleMonacoDidMount}
+              options={{
+                  fontSize: 14,
+                  minimap: { enabled: false },
+                  wordWrap: 'on',
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                  fontFamily: 'Fira Mono, monospace',
+                  lineNumbers: 'on',
+                  tabSize: 4,
+                  overviewRulerBorder: false,
+                  renderLineHighlight: 'all',
+                  renderIndentGuides: true,
+                  renderLineHighlightOnlyWhenFocus: true,
+              }}
           />
         </div>
       </div>

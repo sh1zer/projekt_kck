@@ -5,6 +5,8 @@ import EditorPanel from './EditorPanel';
 import ProblemPanel from './ProblemPanel';
 import TestResultsPanel from './TestResultsPanel';
 import OpponentPanel from './OpponentPanel';
+import VictoryDefeatScreen from './VictoryDefeatScreen';
+import { useUserHistory } from './hooks/useUserHistory';
 import './GameScreen.css';
 
 export default function GameScreen() {
@@ -12,16 +14,19 @@ export default function GameScreen() {
     const { duelId } = useParams();
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
+    const currentUsername = localStorage.getItem('username');
 
     /* ------------------ STATE ------------------ */
     const [duel, setDuel] = useState(null);
+    const [currentUser, setCurrentUser] = useState(null);
     const [code, setCode] = useState('');
     const [testResults, setTestResults] = useState(null);
     const [error, setError] = useState(null);
+    const [showVictoryDefeat, setShowVictoryDefeat] = useState(false);
 
     // Layout
-    const [horizontalSplit, setHorizontalSplit] = useState(50); // percentage
-    const [verticalSplit, setVerticalSplit] = useState(60); // percentage
+    const [horizontalSplit, setHorizontalSplit] = useState(50);
+    const [verticalSplit, setVerticalSplit] = useState(60);
     const [isDragging, setIsDragging] = useState(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -29,6 +34,32 @@ export default function GameScreen() {
     const editorRef = useRef(null);
     const editorContainerRef = useRef(null);
     const initialCodeSet = useRef(false);
+
+    const { userStats } = useUserHistory(currentUser?.username);
+
+    /* ------------------ DETERMINE CURRENT USER ------------------ */
+    useEffect(() => {
+        if (duel && currentUsername) {
+            // Find which player object corresponds to the logged-in user
+            if (duel.player1?.username === currentUsername) {
+                setCurrentUser(duel.player1);
+            } else if (duel.player2?.username === currentUsername) {
+                setCurrentUser(duel.player2);
+            }
+        }
+    }, [duel, currentUsername]);
+
+    /* ------------------ VICTORY/DEFEAT DETECTION ------------------ */
+    useEffect(() => {
+        if (duel?.status === 'completed' && duel?.winner && !showVictoryDefeat) {
+            // Add a small delay to let the user see their final test results
+            const timer = setTimeout(() => {
+                setShowVictoryDefeat(true);
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [duel?.status, duel?.winner, showVictoryDefeat]);
+    
 
     /* ------------------ MONACO THEME ------------------ */
     function handleEditorWillMount(monaco) {
@@ -73,16 +104,13 @@ export default function GameScreen() {
         }
 
         let isMounted = true;
-
         const firstFetch = { done: false };
 
         const longPoll = async () => {
             try {
-                // Use ?poll=false for the very first request so we don't
-                // pay the 30s server long-poll cost on initial page load.
                 const url = firstFetch.done
-                    ? `/api/duels/${duelId}/`                // long-poll
-                    : `/api/duels/${duelId}/?poll=false`;    // fast path
+                    ? `/api/duels/${duelId}/`
+                    : `/api/duels/${duelId}/?poll=false`;
 
                 const resp = await fetch(url, {
                     headers: { Authorization: `Bearer ${token}` },
@@ -105,17 +133,20 @@ export default function GameScreen() {
             } finally {
                 if (isMounted) {
                     firstFetch.done = true;
-                    setTimeout(longPoll, 1000);
+                    // Don't continue polling if game is completed
+                    if (!duel || duel.status !== 'completed') {
+                        setTimeout(longPoll, 1000);
+                    }
                 }
             }
         };
         longPoll();
         return () => { isMounted = false; };
-    }, [duelId, token, navigate]);
+    }, [duelId, token, navigate, duel?.status]);
 
     /* ------------------ SUBMIT ------------------ */
     const handleSubmit = async () => {
-        if (!token) return;
+        if (!token || duel?.status === 'completed') return;
         setError(null);
         setTestResults(null);
         try {
@@ -128,8 +159,16 @@ export default function GameScreen() {
                 body: JSON.stringify({ code }),
             });
             const res = await resp.json();
-            if (resp.ok) setTestResults(res);
-            else setError(res.error || 'Submission failed');
+            if (resp.ok) {
+                setTestResults(res);
+                // Check if this submission won the game
+                if (res.status === 'success') {
+                    // The duel state will be updated via long polling
+                    // Victory screen will show automatically
+                }
+            } else {
+                setError(res.error || 'Submission failed');
+            }
         } catch (e) {
             console.error(e);
             setError('Network error while submitting');
@@ -240,26 +279,30 @@ export default function GameScreen() {
                                     style={{ height: '28px', width: '28px', marginLeft: '1.25rem' }}
                                 />
                                 <span className="text-sm font-bold">DanteDuel</span>
-                                <div className="ml-2 w-3 h-3 bg-orange-500 rounded-full animate-pulse" />
+                                <div className={`ml-2 w-3 h-3 rounded-full ${
+                                    duel.status === 'completed' ? 'bg-gray-500' : 'bg-orange-500 animate-pulse'
+                                }`} />
                                 <button
                                     onClick={handleSubmit}
+                                    disabled={duel.status === 'completed'}
                                     style={{
-                                        background: '#e53e3e',
+                                        background: duel.status === 'completed' ? '#666' : '#e53e3e',
                                         color: '#fff',
                                         borderRadius: '8px',
                                         padding: '0.5rem 1.5rem',
                                         fontWeight: 'bold',
                                         fontSize: '1rem',
                                         marginLeft: 'auto',
+                                        cursor: duel.status === 'completed' ? 'not-allowed' : 'pointer',
                                     }}
                                 >
-                                    Run Code
+                                    {duel.status === 'completed' ? 'Game Ended' : 'Run Code'}
                                 </button>
                             </div>
                         </div>
 
                         {/* PROBLEM PANEL */}
-                        <ProblemPanel style={{ flex: 1, minHeight: 0, height: '100%' }} />
+                        <ProblemPanel duel={duel} style={{ flex: 1, minHeight: 0, height: '100%' }} />
                     </div>
 
                     {/* HORIZONTAL RESIZE HANDLE */}
@@ -280,6 +323,7 @@ export default function GameScreen() {
                             editorContainerRef={editorContainerRef}
                             handleEditorWillMount={handleEditorWillMount}
                             handleEditorDidMount={handleEditorDidMount}
+                            duel={duel}
                         />
                     </div>
                 </div>
@@ -300,7 +344,7 @@ export default function GameScreen() {
                         className="border-r border-gray-700 p-4 overflow-y-auto flex flex-col"
                         style={{ width: `${horizontalSplit}%`, background: '#232323' }}
                     >
-                        <OpponentPanel duel={duel} currentUser={duel.player1} />
+                        <OpponentPanel duel={duel} currentUser={currentUser} />
                     </div>
 
                     {/* HORIZONTAL RESIZE HANDLE */}
@@ -333,6 +377,7 @@ export default function GameScreen() {
                             <X className="w-5 h-5 text-gray-400" />
                         </button>
                     </div>
+                   
                     {/* PROFILE */}
                     <div className="flex-1">
                         <div className="flex items-center gap-3 mb-6">
@@ -340,19 +385,31 @@ export default function GameScreen() {
                                 <User className="w-6 h-6" />
                             </div>
                             <div>
-                                <div className="font-medium">{duel.player1.username}</div>
-                                <div className="text-xs gamescreen-elo">2150</div>
+                                <div className="font-medium">{currentUser?.username || 'Player'}</div>
+                                <div className="text-xs">
+                                    {userStats ? (
+                                        <span>
+                                            <span className="text-green-400">{userStats.wins}W</span>
+                                            <span className="text-gray-400">-</span>
+                                            <span className="text-red-400">{userStats.total_games - userStats.wins}L</span>
+                                        </span>
+                                    ) : (
+                                        <span className="text-gray-400">--W--L</span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                         {/* STATS */}
                         <div className="space-y-3">
                             <div className="text-sm">
-                                <div className="text-gray-400">Battles Won</div>
-                                <div className="font-medium">{duel.player1.battles_won ?? 0}</div>
+                                <div className="text-gray-400">Current Streak</div>
+                                <div className="font-medium">{userStats?.current_streak ?? currentUser?.current_streak ?? 0}</div>
                             </div>
                             <div className="text-sm">
-                                <div className="text-gray-400">Current Streak</div>
-                                <div className="font-medium">{duel.player1.current_streak ?? 0}</div>
+                                <div className="text-gray-400">Win Rate</div>
+                                <div className="font-medium">
+                                    {userStats ? `${userStats.win_rate.toFixed(1)}%` : '---'}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -363,6 +420,15 @@ export default function GameScreen() {
                     </button>
                 </div>
             </div>
+
+            {/* VICTORY/DEFEAT SCREEN - Use currentUser */}
+            {showVictoryDefeat && (
+                <VictoryDefeatScreen
+                    duel={duel}
+                    currentUser={currentUser}
+                    onClose={() => setShowVictoryDefeat(false)}
+                />
+            )}
         </div>
     );
 }
