@@ -36,7 +36,6 @@ function OptionsScreen() {
               value={musicVolume}
               onChange={e => setMusicVolume(Number(e.target.value))}
             />
-            <span>{Math.round(musicVolume * 100)}</span>
           </label>
           <label>
             Button Click Volume:
@@ -48,7 +47,6 @@ function OptionsScreen() {
               value={clickVolume}
               onChange={e => setClickVolume(Number(e.target.value))}
             />
-            <span>{Math.round(clickVolume * 100)}</span>
           </label>
           <label>
             Button Hover Volume:
@@ -60,19 +58,18 @@ function OptionsScreen() {
               value={hoverVolume}
               onChange={e => setHoverVolume(Number(e.target.value))}
             />
-            <span>{Math.round(hoverVolume * 100)}</span>
           </label>
         </div>
         
         <div className="option-group">
           <label className="option-checkbox-label">
+            Enable Sound Effects
             <input 
               type="checkbox"
               className="option-checkbox"
               checked={settings.soundEnabled}
               onChange={(e) => handleSettingChange('soundEnabled', e.target.checked)}
             />
-            Enable Sound Effects
           </label>
         </div>
 

@@ -33,6 +33,7 @@
   background: #232b3e;
   border-radius: 18px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  position: relative; /* Add this for absolute positioning */
 }
 
 .option-group .options-title {
@@ -49,35 +50,39 @@
   font-size: 16px;
   cursor: pointer;
   font-weight: 500;
+  min-height: 24px;
+  position: relative;
 }
 
 .option-checkbox {
-  margin-right: 16px;
+  position: absolute;
+  right: 0; /* Position at the far right of the option group */
+  top: 50%;
+  transform: translateY(-50%); /* Center vertically */
   width: 20px;
   height: 20px;
   accent-color: #e53e3e;
 }
 
-/* Volume control styling */
+/* Volume control styling with 2-column grid */
 .option-group label {
-  color: #ffffff; /* White text for volume controls */
+  color: #ffffff;
   font-weight: 500;
-  display: block;
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  align-items: center;
+  gap: 16px;
   margin-bottom: 12px;
   font-size: 16px;
 }
 
-.option-group input[type="range"] {
-  margin: 0 12px;
-  vertical-align: middle;
-  accent-color: #e53e3e;
+.option-group label:last-child {
+  margin-bottom: 0;
 }
 
-.option-group span {
-  color: #ffd700;
-  font-weight: bold;
-  min-width: 30px;
-  display: inline-block;
+.option-group input[type="range"] {
+  width: 100%;
+  accent-color: #e53e3e;
 }
 
 .options-buttons {
@@ -143,5 +148,9 @@
   
   .option-group {
     padding: 16px;
+  }
+  
+  .option-group label {
+    grid-template-columns: 1fr 150px;
   }
 }
