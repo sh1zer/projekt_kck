@@ -487,7 +487,7 @@ def user_history_view(request, username):
     # Calculate win/loss statistics
     total_games = all_duels.count()
     wins = all_duels.filter(winner=user).count()
-    losses = total_games - wins
+    losses = total_games - wins - all_duels.filter(winner=None).count()
 
     # Get last 5 duels with problem info
     recent_duels = all_duels[:5]
@@ -496,7 +496,7 @@ def user_history_view(request, username):
     for duel in recent_duels:
         opponent = duel.player2 if duel.player1 == user else duel.player1
         if duel.winner is None:
-            result = "timeout"  # or "draw"
+            result = "timeout"
         else:
             result = "win" if duel.winner == user else "loss"
         match_data = {

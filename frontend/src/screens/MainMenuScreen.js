@@ -7,11 +7,41 @@ import { useSound } from '../SoundProvider';
 function MainMenuScreen() {
   const navigate = useNavigate();
   const { playClick, playHover } = useSound();
+  const [userStats, setUserStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const username = localStorage.getItem('username');
+        if (!username) {
+          navigate('/');
+          return;
+        }
+
+        const response = await fetch(`/api/users/${username}/history/`);
+        if (response.ok) {
+          const data = await response.json();
+          setUserStats(data);
+        } else {
+          setError('Failed to load user data');
+        }
+      } catch (err) {
+        setError('Error fetching user data');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [navigate]);
 
   const handleMenuClick = (action) => {
     console.log(`Menu action: ${action}`);
     if (action === 'exit') {
-      navigate('/'); // Navigate to login screen (root path)
+      navigate('/');
     }
   };
 
@@ -20,6 +50,15 @@ function MainMenuScreen() {
     navigate('/waiting');
   };
 
+  const formatWLDStats = (stats) => {
+    if (!stats) return { wins: 0, losses: 0, draws: 0 };
+    const draws = stats.total_games - stats.wins - stats.losses;
+    return {
+      wins: stats.wins,
+      losses: stats.losses,
+      draws: draws
+    };
+  };
   return (
     <>
       <div className="main-menu-root">
@@ -69,10 +108,6 @@ function MainMenuScreen() {
                 <span>LeaderBoard</span>
               </div>
 
-              {/* ————————————————————————————————————————
-                   Здесь добавили placeholder для аватарок
-                   чтобы колонки ровно совпадали с ячейками в строках
-                 ———————————————————————————————————————— */}
               <div className="leaderboard-columns">
                 <div className="column-label rank">RANK</div>
                 <div className="column-label avatar"></div>
@@ -112,32 +147,63 @@ function MainMenuScreen() {
         {/* Right Side */}
         <div className="right-panel">
           <div className="user-profile-card">
-            <img
-              className="user-profile-img"
-              src="https://randomuser.me/api/portraits/men/1.jpg"
-              alt="Mega USER"
-            />
-            <div className="user-profile-info">
-              <div className="user-profile-name">Mega USER</div>
-              <div className="user-profile-elo">
-                ELO <span className="elo-value">2150</span>
+            {loading ? (
+              <div>Loading...</div>
+            ) : error ? (
+              <div>Error: {error}</div>
+            ) : userStats ? (
+              <>
+                <div className="user-profile-img placeholder-avatar">
+                  {userStats.username.charAt(0).toUpperCase()}
+                </div>
+                <div className="user-profile-info">
+                  <div className="user-profile-name">{userStats.username}</div>
+                  <div className="user-profile-elo">
+                    WIN RATE <span className="elo-value">{userStats.statistics.win_rate}%</span>
+                  </div>
+                </div>
+                
+              <div className="user-profile-stats">
+                <div className="wld-breakdown">
+                  {(() => {
+                    const { wins, losses, draws } = formatWLDStats(userStats.statistics);
+                    return (
+                      <>
+                        <div className="wld-stat win">W:{wins}</div>
+                        <div className="wld-stat draw">D:{draws}</div>
+                        <div className="wld-stat loss">L:{losses}</div>
+                      </>
+                    );
+                  })()}
+                </div>
               </div>
-            </div>
-            <div className="user-profile-stats">
-              <div className="wld-label">W/L/D</div>
-              <div className="wld-value">15/5/1</div>
-            </div>
+              </>
+            ) : null}
           </div>
-          <section className="last-problems-card">
-            <div className="last-problems-header">Last Problems</div>
+          
+        
+        <section className="last-problems-card">
+          <div className="last-problems-header">Recent Matches</div>
+          {loading ? (
+            <div>Loading matches...</div>
+          ) : error ? (
+            <div>No recent matches</div>
+          ) : userStats && userStats.recent_matches.length > 0 ? (
             <ol className="last-problems-list">
-              <li>Zadanie</li>
-              <li>Zadanie</li>
-              <li>Zadanie</li>
-              <li>Zadanie</li>
-              <li>Zadanie</li>
+              {userStats.recent_matches.slice(0, 4).map((match, index) => (
+                <li key={match.duel_id} className={`match-result-${match.result}`}>
+                  <strong>{match.problem_title}</strong>
+                  <br />
+                  <small>
+                    vs {match.opponent} - {match.result.toUpperCase()} ({match.problem_difficulty})
+                  </small>
+                </li>
+              ))}
             </ol>
-          </section>
+          ) : (
+            <div>No recent matches found</div>
+          )}
+        </section>
         </div>
       </div>
     </>

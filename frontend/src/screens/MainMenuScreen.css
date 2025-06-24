@@ -493,3 +493,70 @@
   justify-content: center; /* Center horizontally */
   align-items: center; /* Center vertically */
 }
+
+.wld-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.wld-stat {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.wld-stat.win {
+  color: #22c55e; /* Green */
+}
+
+.wld-stat.draw {
+  color: #eab308; /* Yellow */
+}
+
+.wld-stat.loss {
+  color: #ef4444; /* Red */
+}
+
+.placeholder-avatar {
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  border: 2px solid #667eea;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: bold;
+  color: white;
+  text-transform: uppercase;
+}
+
+.match-result-win {
+  border-left: 4px solid #22c55e !important;
+  background: #f0fdf4 !important;
+}
+
+.match-result-win:hover {
+  background: #dcfce7 !important;
+}
+
+.match-result-draw {
+  border-left: 4px solid #eab308 !important;
+  background: #fefce8 !important;
+}
+
+.match-result-draw:hover {
+  background: #fef3c7 !important;
+}
+
+.match-result-loss {
+  border-left: 4px solid #ef4444 !important;
+  background: #fef2f2 !important;
+}
+
+.match-result-loss:hover {
+  background: #fee2e2 !important;
+}
