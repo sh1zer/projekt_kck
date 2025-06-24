@@ -37,6 +37,9 @@ export default function GameScreen() {
 
     const { userStats } = useUserHistory(currentUser?.username);
 
+
+	const [isTimeUp, setIsTimeUp] = useState(false);
+
     /* ------------------ DETERMINE CURRENT USER ------------------ */
     useEffect(() => {
         if (duel && currentUsername) {
@@ -146,7 +149,12 @@ export default function GameScreen() {
 
     /* ------------------ SUBMIT ------------------ */
     const handleSubmit = async () => {
-        if (!token || duel?.status === 'completed') return;
+        if (!token || duel?.status === 'completed' || isTimeUp) {
+            if (isTimeUp) {
+                setError('Cannot submit - time is up!');
+            }
+            return;
+        }
         setError(null);
         setTestResults(null);
         try {
@@ -282,21 +290,28 @@ export default function GameScreen() {
                                 <div className={`ml-2 w-3 h-3 rounded-full ${
                                     duel.status === 'completed' ? 'bg-gray-500' : 'bg-orange-500 animate-pulse'
                                 }`} />
-                                <button
+                               <button
                                     onClick={handleSubmit}
-                                    disabled={duel.status === 'completed'}
+                                    disabled={duel.status === 'completed' || isTimeUp}
                                     style={{
-                                        background: duel.status === 'completed' ? '#666' : '#e53e3e',
-                                        color: '#fff',
+                                        background: (duel.status === 'completed' || isTimeUp) ? '#666' : '#e53e3e',
+                                        color: (duel.status === 'completed' || isTimeUp) ? '#999' : '#fff',
                                         borderRadius: '8px',
                                         padding: '0.5rem 1.5rem',
                                         fontWeight: 'bold',
                                         fontSize: '1rem',
                                         marginLeft: 'auto',
-                                        cursor: duel.status === 'completed' ? 'not-allowed' : 'pointer',
+                                        cursor: (duel.status === 'completed' || isTimeUp) ? 'not-allowed' : 'pointer',
+                                        opacity: (duel.status === 'completed' || isTimeUp) ? 0.6 : 1,
+                                        transition: 'all 0.2s ease',
                                     }}
                                 >
-                                    {duel.status === 'completed' ? 'Game Ended' : 'Run Code'}
+                                    {duel.status === 'completed' 
+                                        ? 'Game Ended' 
+                                        : isTimeUp 
+                                        ? 'Time Up!' 
+                                        : 'Run Code'
+                                    }
                                 </button>
                             </div>
                         </div>
@@ -324,6 +339,7 @@ export default function GameScreen() {
                             handleEditorWillMount={handleEditorWillMount}
                             handleEditorDidMount={handleEditorDidMount}
                             duel={duel}
+                            onTimeUp={setIsTimeUp}
                         />
                     </div>
                 </div>

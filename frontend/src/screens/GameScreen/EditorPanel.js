@@ -9,12 +9,13 @@ export default function EditorPanel({
   editorContainerRef, 
   handleEditorWillMount, 
   handleEditorDidMount,
-  duel 
+  duel,
+  onTimeUp // Add this prop
 }) {
   const [timeLeft, setTimeLeft] = useState('--:--');
   const [isTimeUp, setIsTimeUp] = useState(false);
 
-  // Fixed timer logic using start_time
+  // Update the timer effect to notify parent when time is up
   useEffect(() => {
     if (!duel?.problem?.time_limit || !duel?.start_time) {
       console.log('Timer debug - missing data:', {
@@ -52,7 +53,10 @@ export default function EditorPanel({
 
         if (remaining <= 0) {
           setTimeLeft('00:00');
-          setIsTimeUp(true);
+          if (!isTimeUp) {
+            setIsTimeUp(true);
+            onTimeUp?.(true); // Notify parent component
+          }
           return;
         }
 
@@ -61,7 +65,10 @@ export default function EditorPanel({
         const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         
         setTimeLeft(timeString);
-        setIsTimeUp(false);
+        if (isTimeUp) {
+          setIsTimeUp(false);
+          onTimeUp?.(false); // Reset if time comes back (shouldn't happen but just in case)
+        }
       } catch (error) {
         console.error('Timer error:', error);
         setTimeLeft('--:--');
@@ -75,7 +82,7 @@ export default function EditorPanel({
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [duel?.start_time, duel?.problem?.time_limit, duel?.status]);
+  }, [duel?.start_time, duel?.problem?.time_limit, duel?.status, isTimeUp, onTimeUp]);
 
   // Determine timer color based on time remaining
   const getTimerColor = () => {

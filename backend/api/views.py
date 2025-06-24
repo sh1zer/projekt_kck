@@ -26,18 +26,62 @@ STALE_STATES = {'active'}                 # states that can become stale
 ABANDONED_STATE = 'abandoned'             # make sure this is in your Duel.status choices
 # -------------------------------------------------
 
+
+def _check_duel_timeout(duel):
+    """
+    Check if an active duel has exceeded its problem's time limit.
+    If so, mark it as completed with no winner.
+    NOTE: Caller must hold MATCHMAKING_LOCK if queue cleanup is needed.
+    """
+    if duel and duel.status == 'active':
+        timeout_duration = timedelta(seconds=duel.problem.time_limit)
+        if duel.start_time < timezone.now() - timeout_duration:
+            duel.status = 'completed'
+            duel.winner = None
+            duel.save(update_fields=['status', 'winner', 'updated_at'])
+            
+            print(f"⏰ Duel {duel.id} timed out after {duel.problem.time_limit}s - no winner")
+            return None
+    return duel
+
 def _expire_stale_duel(duel):
     """
-    If `duel` is older than DUEL_TTL, mark it as abandoned and return None.
-    Otherwise return the (still valid) duel object.
+    Check if duel is timed out or stale, mark accordingly.
     """
-    if duel and duel.status in STALE_STATES:
+    if not duel:
+        return None
+    
+    # First check for timeout based on problem time limit
+    duel = _check_duel_timeout(duel)
+    if not duel:
+        return None
+    
+    # Then check for staleness (original logic)
+    if duel.status in STALE_STATES:
         if duel.updated_at < timezone.now() - DUEL_TTL:
             duel.status = ABANDONED_STATE
             duel.save(update_fields=['status', 'updated_at'])
             return None
+    
     return duel
 
+
+def cleanup_timed_out_duels():
+    """Check all active duels for timeouts. Must be called with MATCHMAKING_LOCK held."""
+    active_duels = Duel.objects.filter(status='active')
+    players_to_remove = []
+    
+    for duel in active_duels:
+        original_status = duel.status
+        result_duel = _check_duel_timeout(duel)
+        
+        # If duel timed out, collect players to remove from queue
+        if result_duel is None and original_status == 'active':
+            players_to_remove.extend([duel.player1.id, duel.player2.id])
+    
+    # Remove players from queue (lock already held by caller)
+    for player_id in players_to_remove:
+        remove_user_from_queue(player_id)
 
 # Dummy credentials for proof of concept
 DUMMY_CREDENTIALS = {
@@ -213,6 +257,7 @@ def matchmaking_view(request):
     user = request.user
     
     with MATCHMAKING_LOCK:
+        cleanup_timed_out_duels()
         print(f"🎯 MATCHMAKING START: User {user.username} (id={user.id}) called matchmaking")
         print(f"DEBUG: Current queue state: {MATCHMAKING_QUEUE}")
 
@@ -450,15 +495,22 @@ def user_history_view(request, username):
     
     for duel in recent_duels:
         opponent = duel.player2 if duel.player1 == user else duel.player1
+        if duel.winner is None:
+            result = "timeout"  # or "draw"
+        else:
+            result = "win" if duel.winner == user else "loss"
         match_data = {
             "duel_id": duel.id,
             "problem_title": duel.problem.title,
             "problem_difficulty": duel.problem.difficulty,
             "opponent": opponent.username,
-            "result": "win" if duel.winner == user else "loss",
+            "result": result,
             "completed_at": duel.updated_at
         }
         recent_matches.append(match_data)
+
+
+        
 
     return Response({
         "username": username,

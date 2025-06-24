@@ -50,14 +50,31 @@ export default function ProblemPanel({ duel, ...props }) {
         </span>
       </div>
 
-      {/* Function Signature */}
-      <div className="mb-4 p-3 bg-gray-900 rounded border border-gray-700">
-        <div className="text-sm text-gray-300 mb-1">Function Signature:</div>
-        <code className="text-yellow-400 font-mono text-sm">{problem.signature}</code>
-      </div>
 
       <div className="text-white space-y-4 overflow-y-auto flex-1">
+        {/* Problem Description */}
         <div className="whitespace-pre-wrap">{problem.description}</div>
+        
+        {/* Sample Input/Output */}
+        {(problem.sample_input || problem.sample_output) && (
+          <div className="space-y-3 pt-4 border-t border-gray-700">
+            <h3 className="text-lg font-semibold text-white">Examples</h3>
+            
+            {problem.sample_input && (
+              <div className="bg-gray-900 p-3 rounded border border-gray-700">
+                <div className="text-sm font-medium text-gray-300 mb-2">Sample Input:</div>
+                <pre className="text-green-400 font-mono text-sm whitespace-pre-wrap">{problem.sample_input}</pre>
+              </div>
+            )}
+            
+            {problem.sample_output && (
+              <div className="bg-gray-900 p-3 rounded border border-gray-700">
+                <div className="text-sm font-medium text-gray-300 mb-2">Sample Output:</div>
+                <pre className="text-blue-400 font-mono text-sm whitespace-pre-wrap">{problem.sample_output}</pre>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

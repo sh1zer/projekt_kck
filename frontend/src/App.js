@@ -8,7 +8,7 @@ import {
 import LoginScreen from './screens/LoginScreen';
 import MainMenuScreen from './screens/MainMenuScreen';
 import CodingBattleInterface from './screens/GameScreen/GameScreen';
-import Options from './screens/Options';
+import OptionsScreen from './screens/OptionsScreen';
 import WaitingScreen from './screens/WaitingScreen';
 import './App.css';
 import { SoundProvider } from './SoundProvider';
@@ -34,7 +34,7 @@ function App() {
           <Route path="/waiting" element={<WaitingScreen />} />
           <Route path="/options" element={
             <SoundProvider>
-              <Options/>
+              <OptionsScreen/>
             </SoundProvider>
           } />
           <Route path="/" element={<Navigate to="/login" replace />} />
