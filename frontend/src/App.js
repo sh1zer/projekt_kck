@@ -13,6 +13,7 @@ import WaitingScreen from './screens/WaitingScreen';
 import './App.css';
 import { SoundProvider } from './SoundProvider';
 import BackgroundCanvas from './screens/BackgroundCanvas';
+import ProblemsScreen from './screens/ProblemsScreen';
 
 function App() {
   return (
@@ -35,6 +36,11 @@ function App() {
           <Route path="/options" element={
             <SoundProvider>
               <OptionsScreen/>
+            </SoundProvider>
+          } />
+          <Route path="/problems" element={
+            <SoundProvider>
+              <ProblemsScreen/>
             </SoundProvider>
           } />
           <Route path="/" element={<Navigate to="/login" replace />} />

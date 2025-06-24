@@ -63,34 +63,34 @@ function MainMenuScreen() {
     <>
       <div className="main-menu-root">
         {/* Left Panel */}
-        <div className="main-menu-left-panel">
-          <aside className="left-menu-bar">
-            <div className="logo-app-container">
+          <div className="main-menu-left-panel">
+            <div className="logo-profile-card">
               <div className="hex-logo">
-                <img src="/monkey.png" style={{ width: 90, height: 90 }} alt="App logo" />
+                <img src="/monkey.png" style={{ width: 75, height: 75 }} alt="App logo" />
               </div>
-              <span className="app-name">Dante Duel</span>
+              <div className="logo-info">
+                <div className="app-name">Dante Duel</div>
+              </div>
             </div>
-            <nav className="menu-btns-vertical">
-              <Link to="/options" className="menu-btn" onMouseEnter={playHover} onClick={playClick}>
-                OPTIONS
-              </Link>
-              <Link to="/store" className="menu-btn" onMouseEnter={playHover} onClick={playClick}>
-                STORE
-              </Link>
-              <Link to="/tutorial" className="menu-btn" onMouseEnter={playHover} onClick={playClick}>
-                TUTORIAL
-              </Link>
-              <button
-                className="menu-btn"
-                onMouseEnter={playHover}
-                onClick={() => { playClick(); handleMenuClick('exit'); }}
-              >
-                EXIT
-              </button>
-            </nav>
-          </aside>
-        </div>
+            
+            <section className="menu-buttons-card">
+              <nav className="menu-btns-vertical">
+                <Link to="/options" className="menu-btn" onMouseEnter={playHover} onClick={playClick}>
+                  OPTIONS
+                </Link>
+                <Link to="/problems" className="menu-btn" onMouseEnter={playHover} onClick={playClick}>
+                  PROBLEMS
+                </Link>
+                <button
+                  className="menu-btn"
+                  onMouseEnter={playHover}
+                  onClick={() => { playClick(); handleMenuClick('exit'); }}
+                >
+                  EXIT
+                </button>
+              </nav>
+            </section>
+          </div>
 
         {/* Center Content: Play and Leaderboard */}
         <main className="main-center-area">
