@@ -102,45 +102,6 @@ function MainMenuScreen() {
             >
               PLAY
             </button>
-            <section className="leaderboard-section">
-              <div className="leaderboard-header">
-                <span className="trophy-icon">🏆</span>
-                <span>LeaderBoard</span>
-              </div>
-
-              <div className="leaderboard-columns">
-                <div className="column-label rank">RANK</div>
-                <div className="column-label avatar"></div>
-                <div className="column-label player">PLAYER</div>
-                <div className="column-label elo">ELO</div>
-                <div className="column-label wld">W/L/D</div>
-              </div>
-
-              <div className="leaderboard-table">
-                <div className="leaderboard-row">
-                  <div className="rank">#1</div>
-                  <img
-                    className="player-avatar-img"
-                    src="https://randomuser.me/api/portraits/men/1.jpg"
-                    alt="Mega USER"
-                  />
-                  <div className="player-name">Mega USER</div>
-                  <div className="elo-rating">2150</div>
-                  <div className="wld">15/5/1</div>
-                </div>
-                <div className="leaderboard-row">
-                  <div className="rank">#2</div>
-                  <img
-                    className="player-avatar-img"
-                    src="https://randomuser.me/api/portraits/men/2.jpg"
-                    alt="blablauser"
-                  />
-                  <div className="player-name">blablauser</div>
-                  <div className="elo-rating">1950</div>
-                  <div className="wld">5/15/1</div>
-                </div>
-              </div>
-            </section>
           </div>
         </main>
 
@@ -189,17 +150,28 @@ function MainMenuScreen() {
           ) : error ? (
             <div>No recent matches</div>
           ) : userStats && userStats.recent_matches.length > 0 ? (
-            <ol className="last-problems-list">
-              {userStats.recent_matches.slice(0, 4).map((match, index) => (
-                <li key={match.duel_id} className={`match-result-${match.result}`}>
-                  <strong>{match.problem_title}</strong>
-                  <br />
-                  <small>
-                    vs {match.opponent} - {match.result.toUpperCase()} ({match.problem_difficulty})
-                  </small>
-                </li>
-              ))}
-            </ol>
+            
+          <ol className="last-problems-list">
+          {userStats.recent_matches.slice(0, 4).map((match, index) => {
+            // Map different result types to consistent classes
+            let resultClass = 'match-result-loss'; // default
+            if (match.result === 'win') {
+              resultClass = 'match-result-win';
+            } else if (match.result === 'draw' || match.result === 'timeout') {
+              resultClass = 'match-result-draw';
+            }
+            
+            return (
+              <li key={match.duel_id} className={resultClass}>
+                <strong>{match.problem_title}</strong>
+                <br />
+                <small>
+                  vs {match.opponent} - {match.result.toUpperCase()} ({match.problem_difficulty})
+                </small>
+              </li>
+            );
+          })}
+        </ol>
           ) : (
             <div>No recent matches found</div>
           )}

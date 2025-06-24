@@ -22,6 +22,7 @@
   height: 800px;
   background: #101a28;
   border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Thin white border */
   margin: -5% 0 5% 0;
   display: flex;
   flex-direction: column;
@@ -93,23 +94,20 @@
 
 /* Center column: Play and Leaderboard */
 .main-center-area {
-  flex: 0 0 50%; /* Central div takes exactly 50% of space */
+  flex: 0 0 50%; 
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-width: 0;
-  /* Center content horizontally */
-  justify-content: center;
 }
 .center-column {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 36px;
-  margin-top: 0;
   justify-content: center;
+  height: 100%;
 }
 
 .play-btn {
@@ -120,7 +118,6 @@
   font-size: 80px;
   font-weight: bold;
   padding: 40px 150px;
-  margin-bottom: 0;
   cursor: pointer;
   box-shadow: 0 8px 32px rgba(229,62,62,0.18);
   letter-spacing: 2px;
@@ -129,126 +126,14 @@
   transition: all 0.2s;
   display: block;
   max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
 }
+
 .play-btn:hover {
   background: #c53030;
   transform: translateY(-4px);
 }
 
-.leaderboard-section {
-  background: #131c2b;
-  border-radius: 18px;
-  padding: 40px 60px;
-  min-width: 550px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: 875px;
-  margin-left: auto;
-  margin-right: auto;
-}
 
-.leaderboard-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 26px;
-  font-weight: bold;
-  color: #e53e3e;
-  margin-bottom: 22px;
-}
-
-.leaderboard-columns,
-.leaderboard-row {
-  display: grid;
-  grid-template-columns: 80px 80px 200px 100px 100px;
-  gap: 24px;
-  align-items: center;
-  width: 100%;
-}
-
-.column-label {
-  color: #888;
-  font-size: 14px;
-  font-weight: 800;
-  text-transform: uppercase;
-  width: 100%;
-  text-align: center;
-}
-
-/* Specific column alignments */
-.column-label.rank,
-.rank {
-  text-align: center;
-  color: #ffd700;
-}
-
-.column-label.avatar,
-.player-avatar-img {
-  justify-self: center;
-}
-
-.column-label.player,
-.player-name {
-  text-align: left;
-  color: #ffffff;
-}
-
-.column-label.elo,
-.elo-rating {
-  text-align: center;
-  color: #ffd700;
-}
-
-.column-label.wld,
-.wld {
-  text-align: center;
-  color: #e53e3e;
-}
-
-/* Data row styles */
-.rank {
-  font-weight: bold;
-  font-size: 18px;
-}
-
-.player-avatar-img {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #764ba2;
-}
-
-.player-name {
-  font-weight: 500;
-  font-size: 18px;
-}
-
-.elo-rating {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.wld {
-  font-size: 18px;
-}
-
-.leaderboard-row {
-  padding: 14px 0;
-}
-
-.trophy-icon {
-  font-size: 26px;
-  color: #ffd700;
-}
-
-.leaderboard-table {
-  width: 100%;
-}
 
 /* Right panel: User profile and Last Problems */
 .right-panel {
@@ -336,16 +221,18 @@
   font-weight: 700;
 }
 
+
 .last-problems-card {
-  background: #fff7e6;
-  color: #232323;
+  background: #101a28;
+  color: #ffffff;
   border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Thin white border */
   padding: 36px 32px 36px 32px;
   width: 100%;
   max-width: 400px;
   min-width: 260px;
   min-height: 550px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -354,7 +241,6 @@
   margin-top: 20px;
   height: 550px;
 }
-
 .last-problems-header {
   font-size: 24px;
   font-weight: bold;
@@ -376,20 +262,20 @@
 
 .last-problems-list li {
   font-size: 18px;
-  color: #232323;
+  color: #ffffff; /* White text */
   margin-bottom: 0;
-  background: #fff3d1;
+  background: #1a2332; /* Slightly lighter than main background */
   border-left: 4px solid #e53e3e;
   padding: 12px 16px;
   border-radius: 6px;
   transition: background 0.2s;
-  box-shadow: 0 1px 4px rgba(229,62,62,0.04);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
   text-align: left;
   font-family: 'Roboto', Arial, sans-serif;
 }
 
 .last-problems-list li:hover {
-  background: #ffe4b8;
+  background: #232b3e; /* Darker hover state */
 }
 
 /* Responsive adjustments */
@@ -534,29 +420,30 @@
   text-transform: uppercase;
 }
 
+
 .match-result-win {
   border-left: 4px solid #22c55e !important;
-  background: #f0fdf4 !important;
+  background: #192638 !important; /* Dark green */
 }
 
 .match-result-win:hover {
-  background: #dcfce7 !important;
+  background: #1a4527 !important;
 }
 
 .match-result-draw {
   border-left: 4px solid #eab308 !important;
-  background: #fefce8 !important;
+  background: #192638 !important; /* Dark yellow */
 }
 
 .match-result-draw:hover {
-  background: #fef3c7 !important;
+  background: #3d3318 !important;
 }
 
 .match-result-loss {
   border-left: 4px solid #ef4444 !important;
-  background: #fef2f2 !important;
+  background: #192638 !important;
 }
 
 .match-result-loss:hover {
-  background: #fee2e2 !important;
+  background: #3d1a1a !important;
 }
