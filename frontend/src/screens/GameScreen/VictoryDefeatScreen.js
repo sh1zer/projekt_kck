@@ -36,7 +36,7 @@ export default function VictoryDefeatScreen({ duel, currentUser, onClose }) {
   };
 
   const handlePlayAgain = () => {
-    navigate('/matchmaking');
+    navigate('/waiting');
   };
 
   // Calculate new stats after this game
