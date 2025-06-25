@@ -65,7 +65,15 @@ export function SoundProvider({ children }) {
     if (clickAudio.current) {
       clickAudio.current.currentTime = 0;
       clickAudio.current.volume = clickVolume;
-      clickAudio.current.play();
+      const playPromise = clickAudio.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          // Ignore interrupted playback errors
+          if (error.name !== 'AbortError') {
+            console.warn('Click audio play failed:', error);
+          }
+        });
+      }
     }
   };
 
@@ -73,7 +81,15 @@ export function SoundProvider({ children }) {
     if (hoverAudio.current) {
       hoverAudio.current.currentTime = 0;
       hoverAudio.current.volume = hoverVolume;
-      hoverAudio.current.play();
+      const playPromise = hoverAudio.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          // Ignore interrupted playback errors
+          if (error.name !== 'AbortError') {
+            console.warn('Hover audio play failed:', error);
+          }
+        });
+      }
     }
   };
 
