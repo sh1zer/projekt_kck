@@ -6,8 +6,6 @@ import { useSound } from '../SoundProvider';
 function OptionsScreen() {
   const [settings, setSettings] = React.useState({
     soundEnabled: true,
-    darkMode: true,
-    autoSubmit: false,
   });
 
   const {
@@ -25,10 +23,10 @@ function OptionsScreen() {
       <div className="options-card">
         <h1 className="options-title">Game Options</h1>
 
-        {/* Sound Settings Section - now styled as part of the options card */}
-        <div className="option-group" style={{ marginBottom: 18 }}>
-          <div className="options-title" style={{ marginBottom: 10, fontSize: 20 }}>Sound Settings</div>
-          <label style={{ color: '#232323', fontWeight: 500, display: 'block', marginBottom: 8 }}>
+        {/* Sound Settings Section */}
+        <div className="option-group">
+          <div className="options-title">Sound Settings</div>
+          <label>
             Music Volume:
             <input
               type="range"
@@ -37,11 +35,9 @@ function OptionsScreen() {
               step={0.01}
               value={musicVolume}
               onChange={e => setMusicVolume(Number(e.target.value))}
-              style={{ margin: '0 10px', verticalAlign: 'middle' }}
             />
-            <span>{Math.round(musicVolume * 100)}</span>
           </label>
-          <label style={{ color: '#232323', fontWeight: 500, display: 'block', marginBottom: 8 }}>
+          <label>
             Button Click Volume:
             <input
               type="range"
@@ -50,11 +46,9 @@ function OptionsScreen() {
               step={0.01}
               value={clickVolume}
               onChange={e => setClickVolume(Number(e.target.value))}
-              style={{ margin: '0 10px', verticalAlign: 'middle' }}
             />
-            <span>{Math.round(clickVolume * 100)}</span>
           </label>
-          <label style={{ color: '#232323', fontWeight: 500, display: 'block' }}>
+          <label>
             Button Hover Volume:
             <input
               type="range"
@@ -63,45 +57,19 @@ function OptionsScreen() {
               step={0.01}
               value={hoverVolume}
               onChange={e => setHoverVolume(Number(e.target.value))}
-              style={{ margin: '0 10px', verticalAlign: 'middle' }}
             />
-            <span>{Math.round(hoverVolume * 100)}</span>
           </label>
         </div>
         
         <div className="option-group">
           <label className="option-checkbox-label">
+            Enable Sound Effects
             <input 
               type="checkbox"
               className="option-checkbox"
               checked={settings.soundEnabled}
               onChange={(e) => handleSettingChange('soundEnabled', e.target.checked)}
             />
-            Enable Sound Effects
-          </label>
-        </div>
-
-        <div className="option-group">
-          <label className="option-checkbox-label">
-            <input 
-              type="checkbox"
-              className="option-checkbox"
-              checked={settings.darkMode}
-              onChange={(e) => handleSettingChange('darkMode', e.target.checked)}
-            />
-            Dark Mode
-          </label>
-        </div>
-
-        <div className="option-group">
-          <label className="option-checkbox-label">
-            <input 
-              type="checkbox"
-              className="option-checkbox"
-              checked={settings.autoSubmit}
-              onChange={(e) => handleSettingChange('autoSubmit', e.target.checked)}
-            />
-            Auto-submit on Time Limit
           </label>
         </div>
 
@@ -117,4 +85,3 @@ function OptionsScreen() {
 }
 
 export default OptionsScreen;
-

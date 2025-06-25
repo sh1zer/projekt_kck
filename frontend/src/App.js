@@ -8,11 +8,12 @@ import {
 import LoginScreen from './screens/LoginScreen';
 import MainMenuScreen from './screens/MainMenuScreen';
 import CodingBattleInterface from './screens/GameScreen/GameScreen';
-import Options from './screens/Options';
+import OptionsScreen from './screens/OptionsScreen';
 import WaitingScreen from './screens/WaitingScreen';
 import './App.css';
 import { SoundProvider } from './SoundProvider';
 import BackgroundCanvas from './screens/BackgroundCanvas';
+import ProblemsScreen from './screens/ProblemsScreen';
 
 function App() {
   return (
@@ -34,7 +35,12 @@ function App() {
           <Route path="/waiting" element={<WaitingScreen />} />
           <Route path="/options" element={
             <SoundProvider>
-              <Options/>
+              <OptionsScreen/>
+            </SoundProvider>
+          } />
+          <Route path="/problems" element={
+            <SoundProvider>
+              <ProblemsScreen/>
             </SoundProvider>
           } />
           <Route path="/" element={<Navigate to="/login" replace />} />

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Check, X, ChevronDown, ChevronRight, User } from 'lucide-react';
+import { useUserHistory } from './hooks/useUserHistory';
 
 export default function OpponentPanel({ duel, currentUser }) {
   if (!duel) {
@@ -10,11 +11,15 @@ export default function OpponentPanel({ duel, currentUser }) {
     );
   }
 
+  // Properly determine opponent
   const opponent = currentUser && duel.player1 && duel.player1.id === currentUser.id
     ? duel.player2
     : duel.player1;
 
-  // Find opponent's latest submission, if any
+  // Get opponent stats
+  const { userStats: opponentStats } = useUserHistory(opponent?.username);
+
+  // Find opponent's latest submission
   let latestOppSubmission = null;
   if (duel.submissions && opponent) {
     const opponentSubs = duel.submissions
@@ -23,15 +28,26 @@ export default function OpponentPanel({ duel, currentUser }) {
     latestOppSubmission = opponentSubs[0];
   }
 
-  const tests = latestOppSubmission ? latestOppSubmission.result.tests : null;
-
-  // State for expanding / collapsing individual tests
+  const tests = latestOppSubmission?.result?.tests || null;
   const [expanded, setExpanded] = useState(new Set());
 
   const toggle = (id) => {
     const newSet = new Set(expanded);
     newSet.has(id) ? newSet.delete(id) : newSet.add(id);
     setExpanded(newSet);
+  };
+
+  // Helper function to render win-loss display
+  const renderWinLoss = (stats) => {
+    if (!stats) return <span className="text-gray-400">--W--L</span>;
+    const losses = stats.total_games - stats.wins;
+    return (
+      <span>
+        <span className="text-green-400">{stats.wins}W</span>
+        <span className="text-gray-400">-</span>
+        <span className="text-red-400">{losses}L</span>
+      </span>
+    );
   };
 
   return (
@@ -43,11 +59,17 @@ export default function OpponentPanel({ duel, currentUser }) {
             <User className="w-4 h-4" />
           </div>
           <div>
-            <div className="font-medium">{opponent ? opponent.username : 'Opponent'}</div>
-            <div className="text-xs gamescreen-elo">{opponent?.elo ?? 1950}</div>
+            <div className="font-medium">{opponent ? opponent.username : 'Waiting...'}</div>
+            <div className="text-xs">
+              {opponent ? renderWinLoss(opponentStats) : <span className="text-gray-400">---</span>}
+            </div>
           </div>
           <div className="ml-auto">
-            <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse" />
+            {opponent ? (
+              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+            ) : (
+              <div className="w-3 h-3 bg-gray-500 rounded-full" />
+            )}
           </div>
         </div>
       </div>
@@ -109,8 +131,10 @@ export default function OpponentPanel({ duel, currentUser }) {
           ))}
         </div>
       ) : (
-        <p className="text-gray-400">Opponent has not submitted yet.</p>
+        <p className="text-gray-400">
+          {opponent ? 'Opponent has not submitted yet.' : 'Waiting for opponent to join...'}
+        </p>
       )}
     </div>
   );
-} 
+}
