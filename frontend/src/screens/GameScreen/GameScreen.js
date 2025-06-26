@@ -100,52 +100,93 @@ export default function GameScreen() {
     }
 
     /* ------------------ LONG-POLLING ------------------ */
-    useEffect(() => {
-        if (!token) {
-            navigate('/login');
-            return;
-        }
-
-        let isMounted = true;
-        const firstFetch = { done: false };
-
-        const longPoll = async () => {
-            try {
-                const url = firstFetch.done
-                    ? `/api/duels/${duelId}/`
-                    : `/api/duels/${duelId}/?poll=false`;
-
-                const resp = await fetch(url, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                if (!isMounted) return;
-                if (resp.status === 401) {
-                    navigate('/login');
-                    return;
-                }
-                if (resp.ok) {
-                    const data = await resp.json();
-                    setDuel(data);
-                    if (!initialCodeSet.current && data.problem?.solution_template) {
-                        setCode(data.problem.solution_template);
-                        initialCodeSet.current = true;
-                    }
-                }
-            } catch (e) {
-                console.error('Long-poll error', e);
-            } finally {
-                if (isMounted) {
-                    firstFetch.done = true;
-                    // Don't continue polling if game is completed
-                    if (!duel || duel.status !== 'completed') {
-                        setTimeout(longPoll, 1000);
-                    }
-                }
-            }
-        };
-        longPoll();
-        return () => { isMounted = false; };
-    }, [duelId, token, navigate, duel?.status]);
+   
+	useEffect(() => {
+	    if (!token) {
+	        navigate('/login');
+	        return;
+	    }
+	
+	    let isMounted = true;
+	    let longPollActive = false;
+	
+	    // Initial data fetch (non-blocking)
+	    const initialFetch = async () => {
+	        try {
+	            const resp = await fetch(`/api/duels/${duelId}/?poll=false`, {
+	                headers: { Authorization: `Bearer ${token}` },
+	            });
+	            
+	            if (!isMounted) return;
+	            
+	            if (resp.status === 401) {
+	                navigate('/login');
+	                return;
+	            }
+	            
+	            if (resp.ok) {
+	                const data = await resp.json();
+	                setDuel(data);
+	                if (!initialCodeSet.current && data.problem?.solution_template) {
+	                    setCode(data.problem.solution_template);
+	                    initialCodeSet.current = true;
+	                }
+	                
+	                // Start long polling immediately after initial data is loaded
+	                if (!longPollActive) {
+	                    longPollActive = true;
+	                    startLongPolling();
+	                }
+	            }
+	        } catch (e) {
+	            console.error('Initial fetch error', e);
+	            // Still start long polling even if initial fetch fails
+	            if (!longPollActive) {
+	                longPollActive = true;
+	                setTimeout(startLongPolling, 1000);
+	            }
+	        }
+	    };
+	
+	    // Long polling function (separate from initial fetch)
+	    const startLongPolling = async () => {
+	        while (isMounted && (!duel || duel.status !== 'completed')) {
+	            try {
+	                const resp = await fetch(`/api/duels/${duelId}/`, {
+	                    headers: { Authorization: `Bearer ${token}` },
+	                });
+	                
+	                if (!isMounted) break;
+	                
+	                if (resp.status === 401) {
+	                    navigate('/login');
+	                    break;
+	                }
+	                
+	                if (resp.ok) {
+	                    const data = await resp.json();
+	                    setDuel(data);
+	                    
+	                    // If game is completed, stop long polling
+	                    if (data.status === 'completed') {
+	                        break;
+	                    }
+	                }
+	            } catch (e) {
+	                console.error('Long-poll error', e);
+	                // Wait a bit before retrying on error
+	                await new Promise(resolve => setTimeout(resolve, 2000));
+	            }
+	        }
+	    };
+	
+	    // Start with initial fetch
+	    initialFetch();
+	    
+	    return () => { 
+	        isMounted = false; 
+	    };
+	}, [duelId, token, navigate]);
 
     /* ------------------ SUBMIT ------------------ */
     const handleSubmit = async () => {

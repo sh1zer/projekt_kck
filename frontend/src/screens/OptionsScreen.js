@@ -62,18 +62,7 @@ function OptionsScreen() {
           </label>
         </div>
         
-        <div className="option-group">
-          <label className="option-checkbox-label">
-            Enable Sound Effects
-            <input 
-              type="checkbox"
-              className="option-checkbox"
-              checked={settings.soundEnabled}
-              onChange={(e) => handleSettingChange('soundEnabled', e.target.checked)}
-            />
-          </label>
-        </div>
-
+       
         <div className="options-buttons">
           <button
             className="save-button"
