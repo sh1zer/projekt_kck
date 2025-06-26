@@ -27,10 +27,9 @@ export default function VictoryDefeatScreen({ duel, currentUser, onClose }) {
   }
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowScreen(true), 300);
-    return () => clearTimeout(timer);
+    setShowScreen(true);
   }, []);
-
+  
   const handleReturnToMenu = () => {
     navigate('/main-menu');
   };
