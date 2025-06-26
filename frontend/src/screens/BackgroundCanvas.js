@@ -54,7 +54,7 @@ function createSymbols(count, width, height) {
   });
 }
 
-const BackgroundCanvas = () => {
+const BackgroundCanvas = ({ theme = "dark" }) => {
   const canvasRef = useRef();
   const symbolsRef = useRef([]);
   const lastTimeRef = useRef(0);
@@ -81,9 +81,19 @@ const BackgroundCanvas = () => {
     }
 
     function drawGradient() {
+      let colorStart, colorEnd;
+
+      if (theme === "light") {
+        colorStart = "#abd1f7";
+        colorEnd = "#4f81b3";
+      } else {
+        colorStart = "#232323";
+        colorEnd = "#101a28";
+      }
+
       const grad = ctx.createLinearGradient(0, 0, width, height);
-      grad.addColorStop(0, "#232323");
-      grad.addColorStop(1, "#101a28");
+      grad.addColorStop(0, colorStart);
+      grad.addColorStop(1, colorEnd);
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, width, height);
     }

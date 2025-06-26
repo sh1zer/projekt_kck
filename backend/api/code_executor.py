@@ -1,10 +1,15 @@
 import subprocess
 import os
 import uuid
-from typing import Dict, List, TypedDict, Union
+from typing import Dict, TypedDict
 import platform
-import resource
 import sys
+
+# Importuj resource tylko na Unixach
+if platform.system() != "Windows":
+    import resource
+else:
+    resource = None
 
 class TestCaseResult(TypedDict):
     status: str
@@ -23,12 +28,14 @@ MAX_CODE_LENGTH = 10000  # characters
 
 def set_resource_limits():
     """Set resource limits for the child process"""
-    if platform.system() != 'Windows':
-        try:
-            resource.setrlimit(resource.RLIMIT_AS, (MAX_MEMORY_LIMIT, MAX_MEMORY_LIMIT))
-            resource.setrlimit(resource.RLIMIT_CPU, (MAX_EXECUTION_TIME, MAX_EXECUTION_TIME))
-        except (ValueError, resource.error) as e:
-            print(f"Warning: Could not set resource limits: {e}", file=sys.stderr)
+    if resource is None:
+        return  # Brak resource na Windows
+    try:
+        resource.setrlimit(resource.RLIMIT_AS, (MAX_MEMORY_LIMIT, MAX_MEMORY_LIMIT))
+        resource.setrlimit(resource.RLIMIT_CPU, (MAX_EXECUTION_TIME, MAX_EXECUTION_TIME))
+    except (ValueError, resource.error) as e:
+        print(f"Warning: Could not set resource limits: {e}", file=sys.stderr)
+
 
 def parse_test_output(output: str) -> Dict:
     """

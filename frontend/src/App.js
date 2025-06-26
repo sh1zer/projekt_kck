@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -10,6 +10,8 @@ import MainMenuScreen from './screens/MainMenuScreen';
 import CodingBattleInterface from './screens/GameScreen/GameScreen';
 import OptionsScreen from './screens/OptionsScreen';
 import WaitingScreen from './screens/WaitingScreen';
+import { SettingsProvider } from './context/SettingsContext';
+import { SettingsContext } from './context/SettingsContext';
 import './App.css';
 import { SoundProvider } from './SoundProvider';
 import BackgroundCanvas from './screens/BackgroundCanvas';
@@ -17,36 +19,49 @@ import ProblemsScreen from './screens/ProblemsScreen';
 
 function App() {
   return (
-    <Router>
-      <div className="App">
-        <BackgroundCanvas />
-        <Routes>
-          <Route path="/login" element={<LoginScreen/>} />
-          <Route path="/main-menu" element={
-            <SoundProvider>
-              <MainMenuScreen/>
-            </SoundProvider>
-          } />
-          <Route path="/game/:duelId" element={
-            <SoundProvider>
-              <CodingBattleInterface/>
-            </SoundProvider>
-          } />
-          <Route path="/waiting" element={<WaitingScreen />} />
-          <Route path="/options" element={
-            <SoundProvider>
-              <OptionsScreen/>
-            </SoundProvider>
-          } />
-          <Route path="/problems" element={
-            <SoundProvider>
-              <ProblemsScreen/>
-            </SoundProvider>
-          } />
-          <Route path="/" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </div>
-    </Router>
+    <SettingsProvider>
+      <Router>
+        <AppWrapper />
+      </Router>
+    </SettingsProvider>
+  );
+}
+
+function AppWrapper() {
+  const { settings } = useContext(SettingsContext);
+  const { themeSettings } = useContext(SettingsContext);
+
+  const className = `App ${settings.theme}`;
+
+  return (
+    <div className={className}>
+      <BackgroundCanvas theme={settings.theme} />
+      <Routes>
+        <Route path="/login" element={<LoginScreen/>} />
+        <Route path="/main-menu" element={
+          <SoundProvider>
+            <MainMenuScreen/>
+          </SoundProvider>
+        } />
+        <Route path="/game/:duelId" element={
+          <SoundProvider>
+            <CodingBattleInterface/>
+          </SoundProvider>
+        } />
+        <Route path="/waiting" element={<WaitingScreen />} />
+        <Route path="/options" element={
+          <SoundProvider>
+            <OptionsScreen/>
+          </SoundProvider>
+        } />
+        <Route path="/problems" element={
+          <SoundProvider>
+            <ProblemsScreen/>
+          </SoundProvider>
+        } />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </div>
   );
 }
 

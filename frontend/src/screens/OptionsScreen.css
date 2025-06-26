@@ -64,6 +64,18 @@
   accent-color: #e53e3e;
 }
 
+.option-select {
+  /*
+  top: 50%;
+  transform: translateY(-50%);  Center vertically */
+  background-color: #232b3e;
+  position: absolute;
+  right: 20px;  /*Position at the far right of the option group */
+  width: 80px;
+  height: 20px;
+  accent-color: #e53e3e;
+}
+
 /* Volume control styling with 2-column grid */
 .option-group label {
   color: #ffffff;

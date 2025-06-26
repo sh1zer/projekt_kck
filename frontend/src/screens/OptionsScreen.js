@@ -1,9 +1,15 @@
-import React from 'react';
+import React, { useEffect, useState, useContext  } from "react";
 import { Link } from 'react-router-dom';
+import { SettingsContext } from '../context/SettingsContext';
 import './OptionsScreen.css';
 import { useSound } from '../SoundProvider';
 
 function OptionsScreen() {
+  const { themeSettings, updateSettings } = useContext(SettingsContext);
+  const handleThemeChange = (e) => {
+    updateSettings({ theme: e.target.value });
+  };
+
   const [settings, setSettings] = React.useState({
     soundEnabled: true,
   });
@@ -72,9 +78,23 @@ function OptionsScreen() {
             />
           </label>
         </div>
+        
+        <div className="option-group">
+          <label className="option-checkbox-label">
+            Background theme
+            <select 
+              value={settings.theme} 
+              onChange={handleThemeChange}
+              className="option-select">
+              <option value="none" selected disabled hidden></option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </label>
+        </div>
 
         <div className="options-buttons">
-          <button className="save-button">Save Settings</button>
+          <button className="save-button" onClick={() => window.location.reload()}>Save Settings</button>
           <Link to="/main-menu" className="back-button">
             Back to Main Menu
           </Link>
