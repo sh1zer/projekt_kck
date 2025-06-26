@@ -9,6 +9,7 @@ function OptionsScreen() {
   });
 
   const {
+    playClick, playHover,
     clickVolume, setClickVolume,
     hoverVolume, setHoverVolume,
     musicVolume, setMusicVolume
@@ -74,8 +75,19 @@ function OptionsScreen() {
         </div>
 
         <div className="options-buttons">
-          <button className="save-button">Save Settings</button>
-          <Link to="/main-menu" className="back-button">
+          <button
+            className="save-button"
+            onMouseEnter={playHover}
+            onClick={playClick}
+          >
+            Save Settings
+          </button>
+          <Link
+            to="/main-menu"
+            className="back-button"
+            onMouseEnter={playHover}
+            onClick={playClick}
+          >
             Back to Main Menu
           </Link>
         </div>

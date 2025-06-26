@@ -11,7 +11,6 @@ import CodingBattleInterface from './screens/GameScreen/GameScreen';
 import OptionsScreen from './screens/OptionsScreen';
 import WaitingScreen from './screens/WaitingScreen';
 import './App.css';
-import { SoundProvider } from './SoundProvider';
 import BackgroundCanvas from './screens/BackgroundCanvas';
 import ProblemsScreen from './screens/ProblemsScreen';
 
@@ -22,27 +21,11 @@ function App() {
         <BackgroundCanvas />
         <Routes>
           <Route path="/login" element={<LoginScreen/>} />
-          <Route path="/main-menu" element={
-            <SoundProvider>
-              <MainMenuScreen/>
-            </SoundProvider>
-          } />
-          <Route path="/game/:duelId" element={
-            <SoundProvider>
-              <CodingBattleInterface/>
-            </SoundProvider>
-          } />
+          <Route path="/main-menu" element={<MainMenuScreen />} />
+          <Route path="/game/:duelId" element={<CodingBattleInterface />} />
           <Route path="/waiting" element={<WaitingScreen />} />
-          <Route path="/options" element={
-            <SoundProvider>
-              <OptionsScreen/>
-            </SoundProvider>
-          } />
-          <Route path="/problems" element={
-            <SoundProvider>
-              <ProblemsScreen/>
-            </SoundProvider>
-          } />
+          <Route path="/options" element={<OptionsScreen />} />
+          <Route path="/problems" element={<ProblemsScreen />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </div>
