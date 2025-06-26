@@ -140,10 +140,9 @@ function MainMenuScreen() {
               </div>
               </>
             ) : null}
+
           </div>
-          
-        
-        <section className="last-problems-card">
+          <section className="last-problems-card">
           <div className="last-problems-header">Recent Matches</div>
           {loading ? (
             <div>Loading matches...</div>
@@ -176,6 +175,8 @@ function MainMenuScreen() {
             <div>No recent matches found</div>
           )}
         </section>
+        
+        
         </div>
       </div>
     </>

@@ -186,7 +186,7 @@ export default function GameScreen() {
 	    return () => { 
 	        isMounted = false; 
 	    };
-	}, [duelId, token, navigate]); // Remove duel?.status from dependencies to avoid restart
+	}, [duelId, token, navigate]);
 
     /* ------------------ SUBMIT ------------------ */
     const handleSubmit = async () => {
